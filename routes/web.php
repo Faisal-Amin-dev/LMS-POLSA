@@ -5,6 +5,16 @@ use App\Http\Controllers\DosenController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\MahasiswaController;
 
+
+// Route untuk landing page
+Route::get('/', function () {
+    return view('landing'); 
+});
+
+Route::get('/login', function () {
+    return view('auth.login'); // Kita akan buat file resources/views/auth/login.blade.php setelah ini
+});
+
 // Route untuk halaman login dan logout
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
