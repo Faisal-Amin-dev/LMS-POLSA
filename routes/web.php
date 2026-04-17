@@ -7,6 +7,16 @@ use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\DosenDashboardController;
 
+
+// Route untuk landing page
+Route::get('/', function () {
+    return view('landing'); 
+});
+
+Route::get('/login', function () {
+    return view('auth.login'); // Kita akan buat file resources/views/auth/login.blade.php setelah ini
+});
+
 // Route untuk halaman login dan logout
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
