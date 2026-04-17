@@ -4,12 +4,15 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DosenController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\MahasiswaController;
+use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\DosenDashboardController;
 
 // Route untuk halaman login dan logout
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+//ADMIN
 // Route untuk tambah data dosen, kelas, dan mahasiswa
 
 Route::post('/admin/dosen/store', [DosenController::class, 'store'])->name('admin.dosen.store');
@@ -20,6 +23,16 @@ Route::post('/admin/mahasiswa/store', [MahasiswaController::class, 'store'])->na
 Route::post('/dosen/store', [DosenController::class, 'store'])->name('dosen.store');
 Route::post('/kelas/store', [KelasController::class, 'store'])->name('kelas.store');
 Route::post('/mahasiswa/store', [MahasiswaController::class, 'store'])->name('mahasiswa.store');
+
+// DOSEN
+// Route untuk memproses upload materi
+Route::post('/dosen/materi/store', [MaterialController::class, 'store'])->name('materi.store');
+
+// 1. Rute untuk halaman awal Dasbor Dosen (menampilkan daftar kelas)
+Route::get('/dosen/dashboard', [DosenDashboardController::class, 'index'])->name('dosen.dashboard');
+
+// 2. Rute untuk masuk ke spesifik kelas berdasarkan ID-nya
+Route::get('/dosen/kelas/{id}', [DosenDashboardController::class, 'show'])->name('dosen.kelas.show');
 
 // Kelompok halaman yang butuh login
 Route::middleware(['auth'])->group(function () {
@@ -35,12 +48,17 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Khusus Dosen
-    Route::middleware(['role:dosen'])->group(function () {
-        Route::get('/dosen/dashboard', function () { return view('dosen.dashboard'); });
+    Route::get('/dosen/dashboard', [DosenDashboardController::class, 'index'])
+    ->middleware(['auth', 'role:dosen'])
+    ->name('dosen.dashboard');
     });
+
+    Route::get('/dosen/kelas/{id}', [DosenDashboardController::class, 'show'])
+    ->middleware(['auth', 'role:dosen'])
+    ->name('dosen.kelas.show');
 
     // Khusus Mahasiswa
     Route::middleware(['role:mahasiswa'])->group(function () {
         Route::get('/mahasiswa/dashboard', function () { return view('mahasiswa.dashboard'); });
     });
-});
+

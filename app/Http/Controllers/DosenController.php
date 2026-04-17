@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Course; // Ingat, nama model kelas Pakdhe adalah Course
+use App\Models\Material; // Model untuk Materi
 
 class DosenController extends Controller
 {
@@ -26,6 +28,9 @@ class DosenController extends Controller
         // 3. Kembali dengan pesan sukses
         return redirect()->back()->with('success', 'Data Dosen berhasil ditambahkan!');
     }
-
 }
+    
+
+
+    
 

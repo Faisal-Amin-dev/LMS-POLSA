@@ -16,7 +16,13 @@ return new class extends Migration
             $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
             $table->string('title');
             $table->text('description')->nullable();
-            $table->string('file_path');
+            
+            // UBAH 2 BARIS INI:
+            // Buat file_path menjadi nullable (boleh kosong)
+            $table->string('file_path')->nullable(); 
+            // Tambahkan kolom baru khusus untuk menyimpan link eksternal
+            $table->string('link_url')->nullable(); 
+            
             $table->timestamps();
         });
     }
