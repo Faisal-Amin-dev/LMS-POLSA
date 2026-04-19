@@ -37,6 +37,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [DosenDashboardController::class, 'index'])->name('dashboard');
         Route::get('/kelas/{id}', [DosenDashboardController::class, 'show'])->name('kelas.show');
         Route::post('/materi/store', [MaterialController::class, 'store'])->name('materi.store');
+        Route::post('/announcement', [DosenDashboardController::class, 'storeAnnouncement'])->name('announcement.store');
+        Route::post('/assignment/store', [DosenDashboardController::class, 'storeAssignment'])->name('assignment.store');
     });
 
     // Group Khusus Mahasiswa (INI YANG KITA BUAT)

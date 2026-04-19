@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\Course;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use App\Models\Mahasiswa;
+use App\Models\Course;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -45,4 +46,5 @@ class DatabaseSeeder extends Seeder
             'teacher_id' => $dosen->id,
         ]);
     }
+    
 }

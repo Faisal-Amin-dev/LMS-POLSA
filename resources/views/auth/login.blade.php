@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk - My Polsa LMS</title>
+    <title>Masuk - SERAP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script>
@@ -36,7 +36,7 @@
 
         <div class="p-8">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 tracking-tight">My<span class="text-polsa-hover">Polsa</span></h1>
+                <h1 class="text-3xl font-bold text-gray-800 tracking-tight">SE<span class="text-polsa-hover">RAP</span></h1>
                 <p class="text-sm text-gray-500 mt-2">Sistem Informasi Akademik & LMS Terpadu</p>
             </div>
 

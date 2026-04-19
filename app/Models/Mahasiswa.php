@@ -6,16 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Mahasiswa extends Model
 {
-    // 1. Mendefinisikan nama tabel secara eksplisit
-    // Mencegah Laravel mencari tabel bernama 'mahasiswas'
-    protected $table = 'mahasiswa';
+    protected $table = 'mahasiswa'; // Menghubungkan model dengan tabel 'mahasiswa'
+    protected $fillable = ['user_id', 'nim', 'nama', 'prodi', 'kelas'];
 
-    // 2. Mendaftarkan kolom yang boleh diisi lewat form/controller
-    // Kolom ini harus sama persis dengan yang ada di migration dan controller
-    protected $fillable = [
-        'nim',
-        'nama',
-        'prodi',
-        'source',
-    ];
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
 }

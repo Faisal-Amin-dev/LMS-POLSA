@@ -18,5 +18,16 @@ class Course extends Model
     public function materials() {
         return $this->hasMany(Material::class);
     }
+    /**
+     * Dokumentasi: Menghubungkan Kelas dengan Mahasiswa melalui tabel pivot enrollments.
+     */
+    /**
+     * Dokumentasi: Mengambil daftar mahasiswa di kelas ini.
+     * Relasi Many-to-Many antara Course dan Mahasiswa melalui tabel Enrollments.
+     */
+    public function students()
+    {
+        return $this->belongsToMany(Mahasiswa::class, 'enrollments', 'course_id', 'student_id');
+    }
 
 }
