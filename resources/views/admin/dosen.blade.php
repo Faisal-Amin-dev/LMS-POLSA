@@ -54,7 +54,7 @@
                     <h5 class="modal-title fw-bold text-dark">Form Tambah Dosen</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('dosen.store') }}" method="POST">
+                <form action="{{ route('admin.dosen.store') }}" method="POST">
                     @csrf
                     <div class="modal-body p-4">
                         <div class="mb-3">

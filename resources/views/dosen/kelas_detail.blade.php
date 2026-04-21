@@ -8,8 +8,8 @@
         <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 20px 20px;"></div>
         <div class="relative z-10 w-full flex justify-between items-end">
             <div class="text-slate-900">
-                <h1 class="text-xl sm:text-3xl font-bold mb-1">{{ $kelas->name ?? 'Mata Kuliah' }}</h1>
-                <p class="text-sm sm:text-lg font-medium">Kelas: {{ $kelas->id }}</p>
+                <h2 class="text-4xl font-black text-slate-900 mb-2">{{ $kelas->course_name }}</h2>
+                <p class="text-lg font-bold text-slate-800 opacity-80"> Kode: {{ $kelas->course_code }}</p>
             </div>
             <div class="hidden md:block">
                 <span class="bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
@@ -239,6 +239,70 @@
                         </div>
                     </section>
                 </div>
+            @elseif($activeTab == 'nilai')
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-4 border-b border-slate-100 flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-slate-800">Rekapitulasi Nilai</h2>
+                        <button class="text-xs font-bold text-blue-600 hover:underline">Export Excel</button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50">
+                                    <th class="p-4 text-xs font-bold text-slate-500 uppercase border-b sticky left-0 bg-slate-50 z-10">Nama Mahasiswa</th>
+                                    @foreach($assignments as $tugas)
+                                        <th class="p-4 text-xs font-bold text-slate-500 uppercase border-b min-w-[120px] text-center">
+                                            {{ Str::limit($tugas->title, 15) }}
+                                        </th>
+                                    @endforeach
+                                    <th class="p-4 text-xs font-bold text-slate-900 uppercase border-b text-center bg-yellow-50">Rata-rata</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                @forelse($students as $mhs)
+                                    @php $totalNilai = 0; $countTugas = 0; @endphp
+                                    <tr>
+                                        <td class="p-4 text-sm font-bold text-slate-800 sticky left-0 bg-white border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                                            {{ $mhs->nama }}
+                                            <p class="text-[10px] text-slate-400 font-mono">{{ $mhs->nim }}</p>
+                                        </td>
+
+                                        @foreach($assignments as $tugas)
+                                            @php
+                                                // Ambil nilai dari koleksi yang sudah di-group tadi
+                                                $submission = $submissions[$mhs->id][$tugas->id][0] ?? null;
+                                                $nilai = $submission ? $submission->grade : null;
+                                                if($nilai) { $totalNilai += $nilai; $countTugas++; }
+                                            @endphp
+                                            <td class="p-4 text-center">
+                                                @if($nilai !== null)
+                                                    <span class="inline-block px-2 py-1 rounded bg-green-50 text-green-700 font-bold text-sm">
+                                                        {{ $nilai }}
+                                                    </span>
+                                                @elseif($submission)
+                                                    <span class="text-[10px] text-orange-500 italic">Belum Dinilai</span>
+                                                @else
+                                                    <span class="text-slate-300">-</span>
+                                                @endif
+                                            </td>
+                                        @endforeach
+
+                                        <td class="p-4 text-center font-black text-slate-900 bg-yellow-50">
+                                            {{ $countTugas > 0 ? round($totalNilai / $countTugas, 1) : 0 }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="{{ $assignments->count() + 2 }}" class="p-10 text-center text-slate-400 italic">
+                                            Belum ada mahasiswa terdaftar.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             @endif
            
 @endsection
@@ -287,7 +351,7 @@
                     <h5 class="modal-title fw-bold text-dark">Buat Penugasan Baru</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('dosen.assignment.store') }}" method="POST">
+                <form action="{{ route('dosen.assignment.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="course_id" value="{{ $kelas->id }}">
                     <div class="modal-body p-4">
@@ -298,6 +362,11 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Instruksi Tugas</label>
                             <textarea name="description" class="form-control rounded-3" rows="4" placeholder="Tuliskan detail apa yang harus dikerjakan mahasiswa..." required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Lampiran File (PDF/Docx/MP4)</label>
+                            <input type="file" name="file_tugas" class="form-control">
+                            <small class="text-muted">Opsional, jika ada instruksi tambahan dalam bentuk file.</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Tenggat Waktu (Deadline)</label>

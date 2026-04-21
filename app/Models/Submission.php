@@ -11,4 +11,10 @@ class Submission extends Model
     public function Assignment() {
         return $this->belongsTo(Assignment::class);
     }
+
+    public function student()
+    {
+        return $this->belongsTo(Mahasiswa::class, 'student_id');
+    }
+
 }

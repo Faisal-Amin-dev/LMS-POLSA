@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Mahasiswa Dashboard') - My Polsa</title>
+    <title>@yield('title', 'Mahasiswa Dashboard') - SERAP</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -36,8 +36,8 @@
             :class="sidebarOpen ? 'w-64' : 'w-20'">
             
             <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-800">
-                <span class="font-bold text-polsa text-xl tracking-wider" x-show="sidebarOpen">MY POLSA</span>
-                <span class="font-bold text-polsa text-xl tracking-wider" x-show="!sidebarOpen">MP</span>
+                <span class="font-bold text-polsa text-xl tracking-wider" x-show="sidebarOpen">SERAP</span>
+                <span class="font-bold text-polsa text-xl tracking-wider" x-show="!sidebarOpen">SRP</span>
             </div>
 
             <button @click="sidebarOpen = !sidebarOpen" class="absolute -right-3 top-20 bg-polsa text-slate-900 rounded-full p-1 shadow-md hover:bg-polsa-hover">

@@ -7,7 +7,7 @@
             <h2 class="text-2xl font-bold text-slate-800">Daftar Kelas Praktikum</h2>
             <p class="text-slate-500 text-sm">Pilih kelas untuk mulai mengelola modul dan tugas mahasiswa.</p>
         </div>
-        
+       
         <button type="button" data-bs-toggle="modal" data-bs-target="#modalBuatKelas" class="text-slate-900 font-bold py-2 px-4 rounded-lg shadow-sm flex items-center transition-colors" style="background-color: #FFD700;">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -21,8 +21,12 @@
         @forelse($courses as $course)
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow relative">
             <div class="h-24 p-5 flex flex-col justify-end" style="background-color: #FFD700;">
-                <h3 class="text-lg font-bold text-slate-900 truncate">{{ $course->name ?? 'Nama Kelas' }}</h3>
-                <p class="text-sm text-slate-800 font-medium">Kode: {{ $course->id }}</p>
+                <h3 class="text-xl font-black text-slate-900 truncate leading-tight">
+                    {{ $course->course_name ?? 'Matakuliah Belum Diisi' }}
+                </h3>
+                <p class="text-sm text-slate-800 font-bold opacity-80">
+                    Grup: {{ $course->course_code }}
+                </p>
             </div>
             
             <div class="p-5">
@@ -54,7 +58,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
-            <form action="#" method="POST">
+            <form action="{{ route('dosen.kelas.store') }}" method="POST">
                 @csrf
                 <div class="modal-body p-4">
                     <div class="alert alert-info text-sm bg-blue-50 text-blue-800 border-0 rounded-lg mb-4">
@@ -62,11 +66,11 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nama Mata Kuliah</label>
-                        <input type="text" name="nama_matkul" class="form-control rounded-3" placeholder="Contoh: Jaringan Komputer Dasar" required>
+                        <input type="text" name="course_name" class="form-control rounded-3" placeholder="Contoh: Jaringan Komputer Dasar" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Kode / Grup Kelas</label>
-                        <input type="text" name="kode_kelas" class="form-control rounded-3" placeholder="Contoh: TI-2A" required>
+                        <input type="text" name="course_code" class="form-control rounded-3" placeholder="Contoh: TI-2A" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Deskripsi Singkat (Opsional)</label>

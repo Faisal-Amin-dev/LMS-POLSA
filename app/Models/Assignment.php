@@ -6,11 +6,26 @@ use Illuminate\Database\Eloquent\Model;
 
 class Assignment extends Model
 {
-     protected $fillable = ['course_id', 'title', 'description', 'file_attachment', 'deadline'];
+    protected $fillable = [
+        'course_id', 
+        'title', 
+        'description', 
+        'deadline', 
+        'file_path'
+    ];
 
-     public function Course() {
+    /**
+     * Dokumentasi: Relasi ke tabel Submissions.
+     * Satu tugas bisa punya banyak pengumpulan dari mahasiswa.
+     */
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class, 'assignment_id');
+    }
+
+    // Relasi balik ke Kelas
+    public function course()
+    {
         return $this->belongsTo(Course::class);
-     }
-
-   
+    }
 }
