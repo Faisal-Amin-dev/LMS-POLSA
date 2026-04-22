@@ -38,18 +38,19 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    <tr>
-                        <td colspan="5" class="px-6 py-12 text-center">
-                            <div class="flex flex-col items-center justify-center text-slate-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                                <p class="text-lg font-medium text-slate-600">Belum ada data mahasiswa</p>
-                                <p class="text-sm mt-1">Silakan sinkronisasi dari SIAP POLSA atau tambahkan secara manual.</p>
-                            </div>
+                @forelse($mahasiswas as $index => $mhs)
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4 text-sm text-slate-600">{{ $index + 1 }}</td>
+                        <td class="px-6 py-4 text-sm font-medium text-slate-800">{{ $mhs->nim }}</td>
+                        <td class="px-6 py-4 text-sm text-slate-600">{{ $mhs->nama }}</td>
+                        <td class="px-6 py-4 text-sm text-slate-600">{{ $mhs->prodi }} ({{ $mhs->kelas }})</td>
+                        <td class="px-6 py-4 text-center">
+                            <button class="text-red-600 hover:text-red-900">Hapus</button>
                         </td>
                     </tr>
-                </tbody>
+                @empty
+                    @endforelse
+            </tbody>
             </table>
         </div>
     </div>
@@ -76,13 +77,23 @@
                         <input type="text" name="nama" class="form-control rounded-3" placeholder="Masukkan Nama Lengkap" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label fw-bold">Email Mahasiswa</label>
+                        <input type="email" name="email" class="form-control rounded-3" placeholder="email@student.polsa.ac.id" required>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label fw-bold">Program Studi</label>
                         <select name="prodi" class="form-select rounded-3" required>
                             <option value="">Pilih Prodi</option>
                             <option value="Teknik Informatika">Teknik Informatika</option>
                             <option value="Akuntansi">Akuntansi</option>
                             <option value="Administrasi Bisnis">Administrasi Bisnis</option>
+                            <option value="Teknik Rekayasa Perangkat Lunak">Teknik Rekayasa Perangkat Lunak</option>
+                            <option value="Bisnis Digital">Bisnis Digital</option>
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Kelas</label>
+                        <input type="text" name="kelas" class="form-control rounded-3" placeholder="Masukkan Kelas" required>
                     </div>
                 </div>
                 <div class="modal-footer border-0">

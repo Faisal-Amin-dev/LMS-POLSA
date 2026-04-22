@@ -22,26 +22,34 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-sm uppercase tracking-wider">
-                        <th class="px-6 py-4 font-semibold">No</th>
-                        <th class="px-6 py-4 font-semibold">NIDN</th>
-                        <th class="px-6 py-4 font-semibold">Nama Lengkap</th>
-                        <th class="px-6 py-4 font-semibold">Email</th>
-                        <th class="px-6 py-4 font-semibold text-center">Aksi</th>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase tracking-wider">
+                        <th class="px-6 py-4 font-bold">No</th>
+                        <th class="px-6 py-4 font-bold">NIDN</th>
+                        <th class="px-6 py-4 font-bold">Nama Lengkap</th>
+                        <th class="px-6 py-4 font-bold">Email</th>
+                        <th class="px-6 py-4 font-bold">Prodi</th>
+                        <th class="px-6 py-4 font-bold text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    <tr>
-                        <td colspan="5" class="px-6 py-12 text-center">
-                            <div class="flex flex-col items-center justify-center text-slate-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                <p class="text-lg font-medium text-slate-600">Belum ada data dosen</p>
-                                <p class="text-sm mt-1">Data dari SIAP POLSA akan muncul di sini, atau Anda bisa menambahkannya secara manual.</p>
-                            </div>
-                        </td>
-                    </tr>
+                    @forelse($dosens as $index => $dosen)
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 text-sm text-slate-600">{{ $index + 1 }}</td>
+                            <td class="px-6 py-4 text-sm font-medium text-slate-800">{{ $dosen->nidn }}</td>
+                            <td class="px-6 py-4 text-sm text-slate-600">{{ $dosen->name }}</td>
+                            <td class="px-6 py-4 text-sm text-slate-600">{{ $dosen->email }}</td>
+                            <td class="px-6 py-4 text-sm text-slate-600">{{ $dosen->prodi }}</td>
+                            <td class="px-6 py-4 text-center">
+                                <button class="text-red-600 hover:text-red-900 font-medium text-sm">Hapus</button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+                                Belum ada data dosen.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -54,6 +62,22 @@
                     <h5 class="modal-title fw-bold text-dark">Form Tambah Dosen</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                @if ($errors->any())
+                    <div class="alert alert-danger" style="background-color: #ffebee; color: #c62828; p: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <p><strong>Aduh Pakdhe, datanya ditolak:</strong></p>
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @if(session('success'))
+                    <div class="alert alert-success" style="background-color: #e8f5e9; color: #2e7d32; p: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        {{ session('success') }}
+                    </div>
+                @endif
                 <form action="{{ route('admin.dosen.store') }}" method="POST">
                     @csrf
                     <div class="modal-body p-4">
@@ -63,7 +87,20 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Nama Lengkap</label>
-                            <input type="text" name="nama" class="form-control rounded-3" placeholder="Masukkan Nama Lengkap" required>
+                            <input type="text" name="name" class="form-control rounded-3" placeholder="Masukkan Nama Lengkap" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email</label>
+                            <input type="email" name="email" class="form-control rounded-3" placeholder="Masukkan Email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Username</label>
+                            <input type="text" name="username" class="form-control rounded-3" placeholder="Contoh: fachry99" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Password Login</label>
+                            <input type="password" name="password" class="form-control rounded-3" placeholder="Minimal 8 karakter" required>
+                            <small class="text-muted">Password ini akan digunakan dosen untuk login.</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Program Studi</label>
@@ -72,6 +109,8 @@
                                 <option value="Teknik Informatika">Teknik Informatika</option>
                                 <option value="Akuntansi">Akuntansi</option>
                                 <option value="Administrasi Bisnis">Administrasi Bisnis</option>
+                                <option value="Teknik Rekayasa Perangkat Lunak">Teknik Rekayasa Perangkat Lunak</option>
+                                <option value="Bisnis Digital">Bisnis Digital</option>
                             </select>
                         </div>
                     </div>

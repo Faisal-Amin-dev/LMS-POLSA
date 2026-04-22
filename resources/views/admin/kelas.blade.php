@@ -29,27 +29,32 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-sm uppercase tracking-wider">
-                        <th class="px-6 py-4 font-semibold">No</th>
-                        <th class="px-6 py-4 font-semibold">Kode Kelas</th>
-                        <th class="px-6 py-4 font-semibold">Nama Kelas</th>
-                        <th class="px-6 py-4 font-semibold">Program Studi</th>
-                        <th class="px-6 py-4 font-semibold text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    <tr>
-                        <td colspan="5" class="px-6 py-12 text-center">
-                            <div class="flex flex-col items-center justify-center text-slate-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                                <p class="text-lg font-medium text-slate-600">Belum ada data kelas</p>
-                                <p class="text-sm mt-1">Silakan sinkronisasi dari SIAP POLSA atau tambahkan secara manual.</p>
-                            </div>
+                <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase tracking-wider">
+                    <th class="px-6 py-4 font-semibold">No</th>
+                    <th class="px-6 py-4 font-semibold">Kode Kelas</th>
+                    <th class="px-6 py-4 font-semibold">Nama Kelas</th>
+                    <th class="px-6 py-4 font-semibold">Program Studi</th>
+                    <th class="px-6 py-4 font-semibold">Dosen</th> <th class="px-6 py-4 font-semibold text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @forelse($courses as $index => $course)
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4 text-sm text-slate-600">{{ $index + 1 }}</td>
+                        <td class="px-6 py-4 text-sm font-medium text-slate-800">{{ $course->course_code }}</td>
+                        <td class="px-6 py-4 text-sm text-slate-600">{{ $course->course_name }}</td>
+                        <td class="px-6 py-4 text-sm text-slate-600">{{ $course->prodi }}</td>
+                        <td class="px-6 py-4 text-sm text-slate-600">
+                            {{-- Panggil relasi teacher yang ada di model Course --}}
+                            <span class="font-medium text-slate-700">{{ $course->teacher->name ?? 'Dosen Tidak Ada' }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <button class="text-red-600 hover:text-red-900">Hapus</button>
                         </td>
                     </tr>
-                </tbody>
+                @empty
+                    @endforelse
+            </tbody>
             </table>
         </div>
     </div>
@@ -69,11 +74,11 @@
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Kode Kelas</label>
-                        <input type="text" name="kode_kelas" class="form-control rounded-3" placeholder="Contoh: TI-1A" required>
+                        <input type="text" name="course_code" class="form-control rounded-3" placeholder="Contoh: TI-1A" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nama Kelas</label>
-                        <input type="text" name="nama_kelas" class="form-control rounded-3" placeholder="Contoh: Teknik Informatika 1A" required>
+                        <input type="text" name="course_name" class="form-control rounded-3" placeholder="Contoh: Teknik Informatika 1A" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Program Studi</label>
@@ -82,6 +87,17 @@
                             <option value="Teknik Informatika">Teknik Informatika</option>
                             <option value="Akuntansi">Akuntansi</option>
                             <option value="Administrasi Bisnis">Administrasi Bisnis</option>
+                            <option value="Teknik Rekayasa Perangkat Lunak">Teknik Rekayasa Perangkat Lunak</option>
+                            <option value="Bisnis Digital">Bisnis Digital</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Dosen Pengampu</label>
+                        <select name="teacher_id" class="form-select rounded-3" required>
+                            <option value="">Pilih Dosen Pengampu</option>
+                            @foreach($dosens as $dosen)
+                                <option value="{{ $dosen->id }}">{{ $dosen->name }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>

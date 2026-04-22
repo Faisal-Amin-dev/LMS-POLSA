@@ -3,57 +3,53 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;       
+use App\Models\Mahasiswa;   
+use Illuminate\Support\Facades\Hash; 
+use Illuminate\Support\Facades\DB;  
 
-/**
- * Controller: MahasiswaDashboard
- * Deskripsi: Mengelola tampilan utama ala Google Classroom.
- * Fokus: Tugas (Classwork), Materi (Resources), dan Integrasi Drive.
- */
+
 class MahasiswaController extends Controller
 {
-    public function index()
+   // app/Http/Controllers/MahasiswaController.php
+    public function indexAdmin() // Untuk nampilin tabel di Admin
     {
-        // Simulasi data dari SIAP POLSA & Integrasi GDrive
-        $data = [
-            'akademik' => [
-                'tugas_pending' => 3,
-                'semester'      => 'Semester 4 - TI',
-                'status_spp'    => 'LUNAS',
-                'drive_folder'  => 'https://drive.google.com/...' // Link folder kelas di Drive
-            ],
-            
-            // Fitur Utama: Tugas Mendatang (Deadlines)
-            'tugas_terbaru' => [
-                [
-                    'judul'    => 'Praktikum 5: Integrasi API',
-                    'matkul'   => 'Pemrograman Web II',
-                    'deadline' => 'Besok, 23:59',
-                    'status'   => 'Belum Mengumpulkan',
-                    'urgensi'  => 'high'
-                ],
-                [
-                    'judul'    => 'Laporan Jaringan Nirkabel',
-                    'matkul'   => 'Jaringan Komputer',
-                    'deadline' => '3 Hari lagi',
-                    'status'   => 'Draft',
-                    'urgensi'  => 'medium'
-                ],
-            ],
+        $mahasiswas = \App\Models\Mahasiswa::latest()->get();
+        return view('admin.mahasiswa', compact('mahasiswas'));
+    }
 
-            // Fitur: Materi & Resource (Persiapan Integrasi GDrive)
-            'materi_terbaru' => [
-                ['judul' => 'Modul 4: Normalisasi Database', 'tipe' => 'PDF', 'link' => '#'],
-                ['judul' => 'Slide Arsitektur Jaringan', 'tipe' => 'GSlide', 'link' => '#'],
-            ],
+   // Fungsi simpan data (Store)
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nim'    => 'required|unique:mahasiswa,nim',
+            'nama'   => 'required',
+            'email'  => 'required|email|unique:users,email',
+            'prodi'  => 'required',
+            'kelas'  => 'required',
+        ]);
 
-            // Paket Mata Kuliah (List Kelas)
-            'daftar_kelas' => [
-                ['nama' => 'Manajemen Basis Data', 'dosen' => 'Pak Budi', 'kode' => 'MBD-04'],
-                ['nama' => 'Pemrograman Web II', 'dosen' => 'Ibu Sari', 'kode' => 'PW2-04'],
-                ['nama' => 'Jaringan Komputer', 'dosen' => 'Pak Andi', 'kode' => 'JK-04'],
-            ]
-        ];
+        // Gunakan Transaction biar kalau satu gagal, semua batal (aman!)
+        DB::transaction(function () use ($request) {
+            // 1. Buat User baru untuk login
+            $user = User::create([
+                'name'     => $request->nama,
+                'email'    => $request->email,
+                'username' => $request->nim, 
+                'password' => Hash::make($request->nim), 
+                'role'     => 'mahasiswa',
+            ]);
 
-        return view('mahasiswa.dashboard', compact('data'));
+            // 2. Buat Mahasiswa baru yang terhubung ke User
+            Mahasiswa::create([
+                'user_id' => $user->id,
+                'nim'     => $request->nim,
+                'nama'    => $request->nama,
+                'prodi'   => $request->prodi,
+                'kelas'   => $request->kelas,
+            ]);
+        });
+
+        return redirect()->back()->with('success', 'Data Mahasiswa dan Akun berhasil dibuat! Password default adalah NIM.');
     }
 }

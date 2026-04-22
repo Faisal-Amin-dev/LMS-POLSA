@@ -6,6 +6,7 @@ use App\Http\Controllers\KelasController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\DosenDashboardController;
+use App\Http\Controllers\MahasiswaDashboardController;
 use Illuminate\Support\Facades\Route;
 
 // 1. GUEST ROUTES (Bisa diakses tanpa login)
@@ -22,10 +23,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Group Khusus Admin
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () { // auth dan role admin
+        Route::get('/dosen', [DosenController::class, 'index'])->name('dosen');
         Route::get('/dashboard', function () { return view('admin.dashboard'); })->name('dashboard'); // Rute untuk melihat dashboard admin
-        Route::get('/dosen', function () { return view('admin.dosen'); })->name('dosen'); // Rute untuk melihat daftar dosen
-        Route::get('/kelas', function () { return view('admin.kelas'); })->name('kelas'); // Rute untuk melihat daftar kelas
-        Route::get('/mahasiswa', function () { return view('admin.mahasiswa'); })->name('mahasiswa'); // Rute untuk melihat daftar mahasiswa
+        Route::get('/kelas', [KelasController::class, 'index'])->name('kelas'); // Rute untuk melihat daftar kelas
+        Route::get('/mahasiswa', [MahasiswaController::class, 'indexAdmin'])->name('mahasiswa'); // Rute untuk melihat daftar mahasiswa
         
         Route::post('/dosen/store', [DosenController::class, 'store'])->name('dosen.store'); // Rute untuk menyimpan data dosen baru
         Route::post('/kelas/store', [KelasController::class, 'store'])->name('kelas.store'); // Rute untuk menyimpan data kelas baru
@@ -49,7 +50,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Group Khusus Mahasiswa (INI YANG KITA BUAT)
     Route::middleware(['role:mahasiswa'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () { // auth dan role mahasiswa
-        Route::get('/dashboard', [MahasiswaController::class, 'index'])->name('dashboard'); // Rute untuk melihat dashboard mahasiswa
+        Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard'); // Rute untuk melihat dashboard mahasiswa
     });
 
 });
