@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('courses', function (Blueprint $table) {
+        Schema::create('classroom_mahasiswa', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_mk')->unique(); // Contoh: TI101
-            $table->string('nama_mk');
-            $table->integer('sks');
-            $table->string('prodi');
+            $table->foreignId('classroom_id')->constrained('classrooms')->onDelete('cascade');
+            $table->foreignId('mahasiswa_id')->constrained('mahasiswa')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('courses');
+        Schema::dropIfExists('classroom_mahasiswa');
     }
 };

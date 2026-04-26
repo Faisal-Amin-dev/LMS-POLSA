@@ -9,16 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('mahasiswa', function (Blueprint $table) {
             $table->id();
-            // Hubungkan ke tabel users (untuk login)
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('nim', 20)->unique();
+            $table->string('nim')->unique();
             $table->string('nama');
-            $table->string('prodi')->default('Teknik Informatika');
-            $table->string('kelas', 10); // Contoh: TI-4A
+            $table->string('prodi');
+            $table->string('kelas');
+            $table->integer('semester'); // INI DIA YANG BIKIN ERROR, WAJIB DITAMBAHKAN!
             $table->timestamps();
         });
     }

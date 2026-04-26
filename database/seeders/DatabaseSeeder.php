@@ -11,40 +11,41 @@ use Illuminate\Support\Facades\Hash;
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
-    {
-        // 1. Buat Akun Admin (TAMBAHAN BARU)
-        User::create([
-            'username' => 'ADMIN001',
-            'name' => 'Administrator Kampus',
-            'email' => 'admin@polsa.ac.id',
-            'password' => Hash::make('password123'),
-            'role' => 'admin',
-        ]);
+{
+    // 1. Buat Akun Admin
+    \App\Models\User::create([
+        'username' => 'ADMIN001',
+        'name'     => 'Administrator Kampus',
+        'email'    => 'admin@polsa.ac.id',
+        'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+        'role'     => 'admin',
+        'source'   => 'local',
+    ]);
 
-        // 2. Buat Akun Dosen
-        $dosen = User::create([
-            'username' => 'NIDN001',
-            'name' => 'Faisal Amin',
-            'email' => 'faisal@polsa.ac.id',
-            'password' => Hash::make('password123'),
-            'role' => 'dosen',
-        ]);
+    // 2. Buat Contoh Mata Kuliah (Sesuai kolom baru: nama_mk, kode_mk, sks, prodi)
+    \App\Models\Course::create([
+        'kode_mk' => 'TI4A-KOTLIN',
+        'nama_mk' => 'Pemrograman Mobile Kotlin',
+        'sks'     => 3,
+        'prodi'   => 'Teknik Informatika',
+    ]);
 
-        // 3. Buat Akun Mahasiswa
-        $mahasiswa = User::create([
-            'username' => 'NIM001',
-            'name' => 'Mahasiswa TI',
-            'email' => 'mahasiswa@polsa.ac.id',
-            'password' => Hash::make('password123'),
-            'role' => 'mahasiswa',
-        ]);
+    // 3. (Opsional) Buat Contoh Dosen Dummy
+    $userDosen = \App\Models\User::create([
+        'username' => '0612038501',
+        'name'     => 'Dr. Eko Waluyo, M.T.',
+        'email'    => 'eko@polsa.ac.id',
+        'password' => \Illuminate\Support\Facades\Hash::make('0612038501'),
+        'role'     => 'dosen',
+        'source'   => 'local',
+    ]);
 
-        // 4. Buat Contoh Mata Kuliah
-        Course::create([
-            'course_code' => 'TI4A-01',
-            'course_name' => 'Pemrograman Mobile Kotlin',
-            'teacher_id' => $dosen->id,
-        ]);
-    }
+    \App\Models\Dosen::create([
+        'user_id'         => $userDosen->id,
+        'nidn'            => '0612038501',
+        'nama'            => 'Dr. Eko Waluyo, M.T.',
+        'bidang_keahlian' => 'Mobile Development',
+    ]);
+}
     
 }

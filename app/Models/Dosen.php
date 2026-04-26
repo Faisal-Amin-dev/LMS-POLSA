@@ -9,16 +9,19 @@ class Dosen extends Model
 {
     use HasFactory;
 
-    // 1. Mendefinisikan nama tabel secara eksplisit
-    // Mencegah Laravel mencari tabel bernama 'dosens'
-    protected $table = 'dosen';
+    // Karena nama tabel default Laravel selalu pakai 's', kita pastikan saja
+    protected $table = 'dosens';
 
-    // 2. Mendaftarkan kolom yang boleh diisi lewat form/controller
-    // Kolom ini harus sama persis dengan yang ada di migration dan controller
     protected $fillable = [
+        'user_id',
         'nidn',
         'nama',
-        'prodi',
-        'source',
+        'bidang_keahlian',
     ];
+
+    // Relasi: Satu dosen punya satu akun user
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

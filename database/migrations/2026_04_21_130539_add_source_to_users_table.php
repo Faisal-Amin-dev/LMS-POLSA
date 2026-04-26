@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // Kita tambahkan kolom source untuk menandai asal data (manual/API)
-            $table->string('source')->default('manual')->after('prodi');
+            $table->string('source')->default('local')->after('role');
         });
     }
 
