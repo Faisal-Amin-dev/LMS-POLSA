@@ -3,53 +3,88 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;       
-use App\Models\Mahasiswa;   
-use Illuminate\Support\Facades\Hash; 
-use Illuminate\Support\Facades\DB;  
-
+use App\Models\Mahasiswa;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class MahasiswaController extends Controller
 {
-   // app/Http/Controllers/MahasiswaController.php
-    public function indexAdmin() // Untuk nampilin tabel di Admin
+    public function index(Request $request)
     {
-        $mahasiswas = \App\Models\Mahasiswa::latest()->get();
-        return view('admin.mahasiswa', compact('mahasiswas'));
+        $query = Mahasiswa::with('user');
+        if ($request->prodi) { $query->where('prodi', $request->prodi); }
+        if ($request->semester) { $query->where('semester', $request->semester); }
+
+        $mahasiswas = $query->latest()->get();
+        $daftarProdi = [
+            'Teknik Informatika (D3)', 'Administrasi Bisnis (D3)', 
+            'Akuntansi (D3)', 'TRPL (S1 Terapan)', 'Bisnis Digital (S1 Terapan)'
+        ];
+
+        return view('admin.mahasiswa', compact('mahasiswas', 'daftarProdi'));
     }
 
-   // Fungsi simpan data (Store)
     public function store(Request $request)
     {
         $request->validate([
-            'nim'    => 'required|unique:mahasiswa,nim',
-            'nama'   => 'required',
-            'email'  => 'required|email|unique:users,email',
-            'prodi'  => 'required',
-            'kelas'  => 'required',
+            'nim'      => 'required|unique:mahasiswa,nim',
+            'nama'     => 'required',
+            'prodi'    => 'required',
+            'kelas'    => 'required',
+            'semester' => 'required|numeric',
+            'email'    => 'required|email|unique:users,email',
         ]);
 
-        // Gunakan Transaction biar kalau satu gagal, semua batal (aman!)
-        DB::transaction(function () use ($request) {
-            // 1. Buat User baru untuk login
+        try {
+            DB::beginTransaction();
             $user = User::create([
                 'name'     => $request->nama,
+                'username' => $request->nim,
                 'email'    => $request->email,
-                'username' => $request->nim, 
-                'password' => Hash::make($request->nim), 
+                'password' => Hash::make($request->nim),
                 'role'     => 'mahasiswa',
+                'source'   => 'local',
             ]);
 
-            // 2. Buat Mahasiswa baru yang terhubung ke User
             Mahasiswa::create([
-                'user_id' => $user->id,
-                'nim'     => $request->nim,
-                'nama'    => $request->nama,
-                'prodi'   => $request->prodi,
-                'kelas'   => $request->kelas,
+                'user_id'  => $user->id,
+                'nim'      => $request->nim,
+                'nama'     => $request->nama,
+                'prodi'    => $request->prodi,
+                'kelas'    => $request->kelas,
+                'semester' => $request->semester,
             ]);
-        });
 
-        return redirect()->back()->with('success', 'Data Mahasiswa dan Akun berhasil dibuat! Password default adalah NIM.');
+            DB::commit();
+            return redirect()->back()->with('success', 'Mahasiswa berhasil ditambahkan!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate(['nama'=>'required','prodi'=>'required','kelas'=>'required','semester'=>'required']);
+        try {
+            DB::beginTransaction();
+            $m = Mahasiswa::findOrFail($id);
+            $m->update($request->only(['nama', 'prodi', 'kelas', 'semester']));
+            if($m->user) { $m->user->update(['name' => $request->nama]); }
+            DB::commit();
+            return redirect()->back()->with('success', 'Data berhasil diperbarui!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal update: ' . $e->getMessage());
+        }
+    }
+
+    public function destroy($id)
+    {
+        $m = Mahasiswa::findOrFail($id);
+        if($m->user) { $m->user->delete(); }
+        $m->delete();
+        return redirect()->back()->with('success', 'Data Mahasiswa dan Akun berhasil dihapus!');
     }
 }

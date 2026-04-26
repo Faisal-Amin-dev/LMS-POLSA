@@ -2,32 +2,27 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Course extends Model
-{ 
-    protected $fillable = ['course_code', 'course_name','prodi', 'teacher_id'];
+{
+    use HasFactory;
 
-    public function teacher() {
-        return $this->belongsTo(User::class, 'teacher_id');
-    }
+    protected $table = 'courses';
 
-    public function assignments() {
-        return $this->hasMany(Assignment::class);
-    }
-    public function materials() {
-        return $this->hasMany(Material::class);
-    }
-    /**
-     * Dokumentasi: Menghubungkan Kelas dengan Mahasiswa melalui tabel pivot enrollments.
-     */
-    /**
-     * Dokumentasi: Mengambil daftar mahasiswa di kelas ini.
-     * Relasi Many-to-Many antara Course dan Mahasiswa melalui tabel Enrollments.
-     */
-    public function students()
+    // Daftarkan semua kolom yang boleh diisi lewat form
+    protected $fillable = [
+        'kode_mk',
+        'nama_mk',
+        'sks',
+        'prodi',
+        'semester'
+    ];
+
+    // Relasi ke Kelas (Satu Matkul bisa punya banyak jadwal kelas)
+    public function classrooms()
     {
-        return $this->belongsToMany(Mahasiswa::class, 'enrollments', 'course_id', 'student_id');
+        return $this->hasMany(Classroom::class);
     }
-
 }
