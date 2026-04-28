@@ -7,14 +7,19 @@ use App\Models\User;
 use App\Models\Dosen;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use App\Models\Course;
 
 class DosenController extends Controller
 {
     public function index()
     {
-        // Mengambil data dosen beserta relasi akun (user)
-        $dosens = Dosen::with('user')->latest()->get();
-        return view('admin.dosen', compact('dosens'));
+        // Mengambil data dosen beserta relasi akun (user) dan matkul yang diampu
+        $dosens = Dosen::with(['user', 'courses'])->latest()->get();
+        
+        // Mengambil semua matkul yang sudah terdaftar di sistem (hasil API atau input manual)
+        $courses = Course::orderBy('nama_mk', 'asc')->get(); 
+        
+        return view('admin.dosen', compact('dosens', 'courses'));
     }
 
     public function store(Request $request)

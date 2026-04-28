@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('nama_mk');
             $table->integer('sks');
             $table->string('prodi');
+            $table->string('semester');
             $table->timestamps();
         });
     }

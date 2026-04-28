@@ -16,7 +16,7 @@
 
 <div class="mb-6">
     <h2 class="text-2xl font-bold text-slate-800">Selamat Datang, {{ Auth::user()->name ?? 'Admin' }}!</h2>
-    <p class="text-slate-600">Pusat kendali SERAP (Sistem Edukasi & Rekap Akademik Polsa).</p>
+    <p class="text-slate-600">Pusat kendali SERAP (Sistem Edukasi Ruang Akademik Polsa).</p>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -38,8 +38,7 @@
             <div class="bg-blue-600 h-1.5 rounded-full" style="width: {{ $persentaseApi }}%"></div>
         </div>
         <p class="text-xs text-slate-500">
-            <span class="font-semibold text-slate-700">{{ $stats['mahasiswa_api'] }}</span> dari API | 
-            <span class="font-semibold text-slate-700">{{ $stats['mahasiswa_local'] }}</span> Manual
+            <span class="font-semibold text-slate-700"></span> Jumlah mahasiswa yang diketahui
         </p>
     </div>
 

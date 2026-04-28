@@ -53,10 +53,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kelas', [KelasController::class, 'index'])->name('kelas');
         Route::post('/kelas/store', [KelasController::class, 'store'])->name('kelas.store');
         Route::post('/kelas/sync', [ApiSyncController::class, 'syncKelas'])->name('kelas.sync');
+        Route::delete('/kelas/{id}', [KelasController::class, 'destroy'])->name('kelas.destroy');
 
         // Matkul dan rute hapus kelas
         Route::post('/course/store', [KelasController::class, 'storeCourse'])->name('course.store');
-        Route::delete('/kelas/{id}', [KelasController::class, 'destroy'])->name('kelas.destroy');
+    
+        Route::put('/course/{id}', [KelasController::class, 'updateCourse'])->name('course.update'); // <--- TAMBAHAN
+        Route::delete('/course/{id}', [KelasController::class, 'destroyCourse'])->name('course.destroy'); // <--- TAMBAHAN
+
+        
     });
 
     // ==========================================
