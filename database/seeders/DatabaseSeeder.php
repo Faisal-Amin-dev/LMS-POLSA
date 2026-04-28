@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
         'nama_mk' => 'Pemrograman Mobile Kotlin',
         'sks'     => 3,
         'prodi'   => 'Teknik Informatika',
+        'semester' => '4',
     ]);
 
     // 3. (Opsional) Buat Contoh Dosen Dummy

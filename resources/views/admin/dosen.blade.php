@@ -39,7 +39,7 @@
                     <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-bold">
                         <th class="px-6 py-4">Dosen</th>
                         <th class="px-6 py-4">Kontak</th>
-                        <th class="px-6 py-4">Bidang Keahlian</th>
+                        <th class="px-6 py-4">Matkul</th>
                         <th class="px-6 py-4 text-center">Sumber</th>
                         <th class="px-6 py-4 text-center">Aksi</th>
                     </tr>
@@ -63,9 +63,17 @@
                             {{ $dsn->user->email ?? '-' }}
                         </td>
 
-                        <td class="px-6 py-4">
-                            <div class="text-sm text-slate-800 font-medium">{{ $dsn->bidang_keahlian ?? 'Belum ditentukan' }}</div>
-                        </td>
+             <td class="px-6 py-4">
+                <div class="flex flex-wrap gap-1">
+                    @forelse($dsn->courses as $c)
+                        <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase rounded border border-blue-100">
+                            {{ $c->nama_mk }}
+                        </span>
+                    @empty
+                        <span class="text-xs text-slate-400 italic">Belum ada matkul diampu</span>
+                    @endforelse
+                </div>
+            </td>
 
                         <td class="px-6 py-4 text-center">
                             @if(($dsn->user->source ?? 'local') == 'siap_polsa')
@@ -174,10 +182,22 @@
                             <label class="form-label font-bold text-slate-700">Email</label>
                             <input type="email" name="email" class="form-control rounded-xl" value="{{ $dsn->user->email ?? '' }}" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label font-bold text-slate-700">Bidang Keahlian</label>
-                            <input type="text" name="bidang_keahlian" class="form-control rounded-xl" value="{{ $dsn->bidang_keahlian }}">
-                        </div>
+                            <div class="mb-4">
+                                <label class="text-xs font-bold text-slate-500 uppercase mb-3 block text-blue-600">
+                                    Pilih Mata Kuliah yang Diampu:
+                                </label>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                    @foreach($courses as $course)
+                                    <label class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-slate-100 hover:border-blue-500 cursor-pointer transition-all">
+                                        <input type="checkbox" name="courses[]" value="{{ $course->id }}" 
+                                            class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                            {{ isset($dsn) && $dsn->courses->contains($course->id) ? 'checked' : '' }}>
+                                        <span class="text-sm text-slate-700">{{ $course->nama_mk }} (SMT {{ $course->semester }})</span>
+                                    </label>
+                                    @endforeach
+                                </div>
+                                <small class="text-slate-400 mt-2 block italic">Matkul ini diambil dari data Mata Kuliah yang sudah di-input/sync.</small>
+                            </div>
                     </div>
                     <div class="modal-footer border-0 p-4 pt-0">
                         <button type="button" class="btn btn-light rounded-xl px-4" data-bs-dismiss="modal">Batal</button>

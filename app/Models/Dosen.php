@@ -9,19 +9,29 @@ class Dosen extends Model
 {
     use HasFactory;
 
-    // Karena nama tabel default Laravel selalu pakai 's', kita pastikan saja
+    // Pastikan nama tabelnya benar
     protected $table = 'dosens';
 
+    // Daftarkan kolom yang boleh diisi
     protected $fillable = [
         'user_id',
         'nidn',
         'nama',
-        'bidang_keahlian',
+        'bidang_keahlian', // <- Penting, pastikan ini ada
     ];
 
-    // Relasi: Satu dosen punya satu akun user
+    // Relasi ke Akun Login (User)
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // ==========================================
+    // INI DIA FUNGSI YANG BIKIN ERROR KALAU HILANG
+    // ==========================================
+    // Relasi Many-to-Many ke Mata Kuliah (Course)
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'course_dosen');
     }
 }

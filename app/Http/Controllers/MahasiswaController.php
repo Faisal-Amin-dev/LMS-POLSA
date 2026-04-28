@@ -64,19 +64,48 @@ class MahasiswaController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+public function update(Request $request, $id)
     {
-        $request->validate(['nama'=>'required','prodi'=>'required','kelas'=>'required','semester'=>'required']);
+        $mahasiswa = Mahasiswa::findOrFail($id);
+
+        // Validasi, pastikan NIM/Email unik, KECUALI milik mahasiswa ini sendiri
+        $request->validate([
+            'nim'      => 'required|unique:mahasiswas,nim,' . $id,
+            'nama'     => 'required',
+            'email'    => 'required|email|unique:users,email,' . $mahasiswa->user_id,
+            'prodi'    => 'required',
+            'kelas'    => 'required',
+            'semester' => 'required|numeric'
+        ]);
+
         try {
             DB::beginTransaction();
-            $m = Mahasiswa::findOrFail($id);
-            $m->update($request->only(['nama', 'prodi', 'kelas', 'semester']));
-            if($m->user) { $m->user->update(['name' => $request->nama]); }
+
+            // 1. Update Akun Login (Tabel users)
+            $user = \App\Models\User::find($mahasiswa->user_id);
+            if ($user) {
+                $user->update([
+                    'name'     => $request->nama,
+                    'email'    => $request->email,
+                    'username' => $request->nim, // Username ikut berubah jika NIM diubah
+                ]);
+            }
+
+            // 2. Update Data Profil (Tabel mahasiswas)
+            // Kita pisahkan email karena email tidak ada di tabel mahasiswas
+            $mahasiswa->update([
+                'nim'      => $request->nim,
+                'nama'     => $request->nama,
+                'prodi'    => $request->prodi,
+                'kelas'    => $request->kelas,
+                'semester' => $request->semester,
+            ]);
+
             DB::commit();
-            return redirect()->back()->with('success', 'Data berhasil diperbarui!');
+            return redirect()->back()->with('success', 'Data mahasiswa beserta akun loginnya berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal update: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal mengupdate data: ' . $e->getMessage());
         }
     }
 
