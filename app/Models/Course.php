@@ -17,7 +17,8 @@ class Course extends Model
         'nama_mk',
         'sks',
         'prodi',
-        'semester'
+        'semester',
+        'teacher_id',
     ];
 
     // Relasi ke Kelas (Satu Matkul bisa punya banyak jadwal kelas)

@@ -13,8 +13,8 @@ class Kelas extends Model
     // 2. Mendaftarkan kolom yang boleh diisi lewat form/controller
     // Kolom ini harus sama persis dengan yang ada di migration dan controller
     protected $fillable = [
-        'kode_kelas',
-        'nama_kelas',
+        'kode_mk',
+        'nama_mk',
         'prodi',
         'source',
     ];

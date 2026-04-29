@@ -112,12 +112,12 @@ class ApiSyncController extends Controller
             [
                 'kode_mk' => 'TI204', 'nama_mk' => 'Pemrograman Web Lanjut', 'sks' => 3, 'prodi' => 'Teknik Informatika (D3)', 'semester' => 4,
                 'dosen_nidn' => '0521049001', 'dosen_nama' => 'Bpk. Hendro, M.Kom',
-                'kelas_kode' => 'TI 4A', 'hari' => 'Senin', 'jam_mulai' => '08:00', 'jam_selesai' => '10:30', 'tahun' => '2025/2026'
+                'kode_mk' => 'TI 4A', 'hari' => 'Senin', 'jam_mulai' => '08:00', 'jam_selesai' => '10:30', 'tahun' => '2025/2026'
             ],
             [
                 'kode_mk' => 'TI205', 'nama_mk' => 'Sistem Basis Data', 'sks' => 4, 'prodi' => 'Teknik Informatika (D3)', 'semester' => 4,
                 'dosen_nidn' => '0521049002', 'dosen_nama' => 'Ibu Siti, M.T',
-                'kelas_kode' => 'TI 4B', 'hari' => 'Sabtu', 'jam_mulai' => '13:00', 'jam_selesai' => '16:00', 'tahun' => '2025/2026'
+                'kode_mk' => 'TI 4B', 'hari' => 'Sabtu', 'jam_mulai' => '13:00', 'jam_selesai' => '16:00', 'tahun' => '2025/2026'
             ]
         ];
 
@@ -145,7 +145,7 @@ class ApiSyncController extends Controller
             $classroom = Classroom::updateOrCreate(
                 [
                     'course_id' => $course->id, 
-                    'nama_kelas' => $data['kelas_kode'] . ' - ' . $data['nama_mk'],
+                    'nama_kelas' => $data['kode_mk'] . ' - ' . $data['nama_mk'],
                     'tahun_akademik' => $data['tahun']
                 ],
                 [
@@ -154,7 +154,7 @@ class ApiSyncController extends Controller
             );
 
             // 5. OTOMATIS SEDOT MAHASISWA
-            $mahasiswaIds = Mahasiswa::where('kelas', $data['kelas_kode'])->pluck('id');
+            $mahasiswaIds = Mahasiswa::where('kelas', $data['kode_mk'])->pluck('id');
             $classroom->mahasiswas()->syncWithoutDetaching($mahasiswaIds);
         }
         DB::commit();

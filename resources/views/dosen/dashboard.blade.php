@@ -22,10 +22,10 @@
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow relative">
             <div class="h-24 p-5 flex flex-col justify-end" style="background-color: #FFD700;">
                 <h3 class="text-xl font-black text-slate-900 truncate leading-tight">
-                    {{ $course->course_name ?? 'Matakuliah Belum Diisi' }}
+                    {{ $course->nama_mk ?? 'Matakuliah Belum Diisi' }}
                 </h3>
                 <p class="text-sm text-slate-800 font-bold opacity-80">
-                    Grup: {{ $course->course_code }}
+                    Grup: {{ $course->kode_mk ?? 'Kode Belum Diisi' }}
                 </p>
             </div>
             
@@ -66,11 +66,11 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nama Mata Kuliah</label>
-                        <input type="text" name="course_name" class="form-control rounded-3" placeholder="Contoh: Jaringan Komputer Dasar" required>
+                        <input type="text" name="nama_mk" class="form-control rounded-3" placeholder="Contoh: Jaringan Komputer Dasar" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Kode / Grup Kelas</label>
-                        <input type="text" name="course_code" class="form-control rounded-3" placeholder="Contoh: TI-2A" required>
+                        <input type="text" name="kode_mk" class="form-control rounded-3" placeholder="Contoh: TI-2A" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Deskripsi Singkat (Opsional)</label>

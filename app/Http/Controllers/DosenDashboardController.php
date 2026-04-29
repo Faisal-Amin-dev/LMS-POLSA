@@ -17,10 +17,21 @@ class DosenDashboardController extends Controller
     // Fungsi untuk menampilkan halaman depan Dasbor Dosen
     public function index()
     {
-        
-        $courses = Course::where('teacher_id', auth()->id())->latest()->get(); 
-        
-        return view('dosen.dashboard', compact('courses'));
+        $user = auth()->user();
+        // Ambil data dosen yang sedang login
+        $dosen = \App\Models\Dosen::where('user_id', $user->id)->first();
+
+        if (!$dosen) {
+            return redirect('/')->with('error', 'Data dosen tidak ditemukan.');
+        }
+
+        // CARA BENAR: Ambil matkul lewat relasi (Pivot Table course_dosen)
+        $courses = $dosen->courses; 
+
+        // Ambil kelas yang diajar dosen ini
+        $classrooms = \App\Models\Classroom::where('dosen_id', $dosen->id)->with('course')->get();
+
+        return view('dosen.dashboard', compact('dosen', 'courses', 'classrooms'));
     }
 
     // Fungsi untuk masuk ke dalam Ruang Kelas
@@ -42,21 +53,28 @@ class DosenDashboardController extends Controller
 
     public function storeKelas(Request $request)
     {
-        // 1. Validasi input
         $request->validate([
-            'course_code' => 'required|unique:courses',
-            'course_name' => 'required',
+            'course_id' => 'required',
+            'nama_kelas' => 'required',
+            'hari' => 'required',
+            'jam_mulai' => 'required',
+            'jam_selesai' => 'required',
+            'tahun_akademik' => 'required',
         ]);
 
-        // 2. Simpan ke database
-        Course::create([
-            'course_code' => $request->course_code,
-            'course_name' => $request->course_name,
-            'teacher_id'  => auth()->id(), // Pakai ID dosen yang lagi login
+        $dosen = \App\Models\Dosen::where('user_id', auth()->id())->first();
+
+        \App\Models\Classroom::create([
+            'course_id' => $request->course_id,
+            'dosen_id' => $dosen->id,
+            'nama_kelas' => $request->nama_kelas,
+            'hari' => $request->hari,
+            'jam_mulai' => $request->jam_mulai,
+            'jam_selesai' => $request->jam_selesai,
+            'tahun_akademik' => $request->tahun_akademik,
         ]);
 
-        // 3. Balik lagi ke dashboard dengan pesan sukses
-        return redirect()->route('dosen.dashboard')->with('success', 'Kelas baru berhasil dibuat!');
+        return redirect()->back()->with('success', 'Kelas berhasil dibuat!');
     }
 
     // Fungsi untuk membuat pengumuman baru
@@ -98,11 +116,21 @@ class DosenDashboardController extends Controller
     // Fungsi untuk menampilkan jadwal mengajar dosen
     public function jadwal()
     {
-        // Dokumentasi: Mengambil jadwal hanya untuk kelas yang diajar dosen yang login
-        $jadwal = Schedule::whereHas('course', function($query) {
-            $query->where('teacher_id', auth()->id());
-        })->with('course')->orderBy('start_time')->get();
+        $user = auth()->user();
+        $dosen = \App\Models\Dosen::where('user_id', $user->id)->first();
 
+        if (!$dosen) {
+            return redirect()->back()->with('error', 'Data dosen tidak ditemukan.');
+        }
+
+        // Ubah nama variabel dari $schedules menjadi $jadwal
+        $jadwal = \App\Models\Classroom::with('course')
+            ->where('dosen_id', $dosen->id)
+            ->orderBy('hari', 'asc') 
+            ->orderBy('jam_mulai', 'asc')
+            ->get();
+
+        // Pastikan di sini namanya 'jadwal' (tanpa tanda $)
         return view('dosen.jadwal', compact('jadwal'));
     }
     // Fungsi untuk menampilkan arsip nilai mahasiswa
@@ -112,7 +140,7 @@ class DosenDashboardController extends Controller
          * Dokumentasi: Mengambil semua mata kuliah yang diampu dosen ini 
          * beserta jumlah mahasiswa dan rata-rata nilainya.
          */
-        $courses = Course::where('teacher_id', auth()->id())
+        $courses = Course::where('dosen_id', auth()->id())
                     ->with(['students', 'assignments.submissions'])
                     ->get();
 

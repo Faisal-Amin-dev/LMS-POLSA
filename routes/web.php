@@ -78,6 +78,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/materi/store', [MaterialController::class, 'store'])->name('materi.store');
         Route::post('/announcement', [DosenDashboardController::class, 'storeAnnouncement'])->name('announcement.store');
         Route::post('/assignment/store', [DosenDashboardController::class, 'storeAssignment'])->name('assignment.store');
+        Route::post('/kelas/store', [DosenDashboardController::class, 'storeKelas'])->name('kelas.store');
     });
 
     // ==========================================
