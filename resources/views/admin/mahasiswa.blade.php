@@ -94,35 +94,35 @@
                 <h5 class="text-xl font-bold text-slate-800">Tambah Mahasiswa</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="formTambahMahasiswa" method="POST">
+            <form action="{{ route('admin.mahasiswa.store') }}" id="formTambahMahasiswa" method="POST">
                 @csrf
                 <div class="modal-body p-6">
                     <div class="mb-3">
                         <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">NIM</label>
-                        <input type="text" name="nim" id="edit_nim" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
+                        <input type="text" name="nim" id="nim" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
                         <small class="text-blue-500 text-[10px] mt-1 block">*Pastikan NIM unik dan benar.</small>
                     </div>
                     <div class="mb-3">
                         <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Email Mahasiswa</label>
-                        <input type="email" name="email" id="edit_email" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
+                        <input type="email" name="email" id="email" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
                     </div>
                     <div class="mb-3">
                         <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Nama Lengkap</label>
-                        <input type="text" name="nama" id="edit_nama" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
+                        <input type="text" name="nama" id="nama" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Prodi</label>
-                            <input type="text" name="prodi" id="edit_prodi" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
+                            <input type="text" name="prodi" id="prodi" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Kelas</label>
-                            <input type="text" name="kelas" id="edit_kelas" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
+                            <input type="text" name="kelas" id="kelas" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
                         </div>
                     </div>
                     <div>
                         <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Semester</label>
-                        <input type="number" name="semester" id="edit_semester" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
+                        <input type="number" name="semester" id="semester" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
                     </div>
                 </div>
                 <div class="modal-footer border-none p-6 pt-0 flex gap-2">

@@ -8,7 +8,7 @@ use App\Models\Material;
 use App\Models\Announcement;
 use App\Models\Assignment;
 use App\Models\Schedule;
-use App\Exports\RekapNilaiExport;
+use App\Exports\ArsipNilaiExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -134,22 +134,30 @@ class DosenDashboardController extends Controller
         return view('dosen.jadwal', compact('jadwal'));
     }
     // Fungsi untuk menampilkan arsip nilai mahasiswa
-    public function arsipNilai()
+    public function arsipNilai(Request $request)
     {
-        /**
-         * Dokumentasi: Mengambil semua mata kuliah yang diampu dosen ini 
-         * beserta jumlah mahasiswa dan rata-rata nilainya.
-         */
-        $courses = Course::where('dosen_id', auth()->id())
-                    ->with(['students', 'assignments.submissions'])
-                    ->get();
+        $user = auth()->user();
+        $dosen = \App\Models\Dosen::where('user_id', $user->id)->first();
 
-        return view('dosen.arsip_nilai', compact('courses'));
-    }
-    // Fungsi untuk mengekspor nilai mahasiswa ke Excel
-    public function exportExcel($course_id) 
-    {
-        return Excel::download(new RekapNilaiExport($course_id), 'rekap-nilai.xlsx');
+        if (!$dosen) {
+            return redirect()->back()->with('error', 'Data dosen tidak ditemukan.');
+        }
+
+        // 1. Data utama untuk tampilan & export
+        $classrooms = \App\Models\Classroom::where('dosen_id', $dosen->id)
+            ->with('course')
+            ->get();
+
+        $courses = $dosen->courses;
+
+        // 2. LOGIKA EXCEL: Jika ada request 'export', jalankan fungsi download
+        if ($request->get('type') == 'excel') {
+            // Ganti 'ArsipNilaiExport' dengan nama class export yang pernah Pakdhe buat
+            return Excel::download(new ArsipNilaiExport($classrooms), 'Arsip_Nilai_' . $dosen->nama . '.xlsx');
+        }
+
+        // 3. Jika tidak klik export, tampilkan halaman seperti biasa
+        return view('dosen.arsip_nilai', compact('classrooms', 'courses'));
     }
 
     
