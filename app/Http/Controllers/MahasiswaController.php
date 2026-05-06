@@ -12,6 +12,12 @@ class MahasiswaController extends Controller
 {
     public function index(Request $request)
     {
+         // Eager loading 'classrooms' agar tidak berat saat load data banyak
+        $mahasiswas = Mahasiswa::with('user', 'classrooms')->latest()->get();
+        
+        // Ambil semua data kelas untuk pilihan di modal
+        $classrooms = \App\Models\Classroom::all();
+
         $query = Mahasiswa::with('user');
         if ($request->prodi) { $query->where('prodi', $request->prodi); }
         if ($request->semester) { $query->where('semester', $request->semester); }
@@ -22,7 +28,7 @@ class MahasiswaController extends Controller
             'Akuntansi (D3)', 'TRPL (S1 Terapan)', 'Bisnis Digital (S1 Terapan)'
         ];
 
-        return view('admin.mahasiswa', compact('mahasiswas', 'daftarProdi'));
+        return view('admin.mahasiswa', compact('mahasiswas', 'classrooms', 'daftarProdi'));
     }
 
     public function store(Request $request)
@@ -64,18 +70,17 @@ class MahasiswaController extends Controller
         }
     }
 
-public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $mahasiswa = Mahasiswa::findOrFail($id);
 
-        // Validasi, pastikan NIM/Email unik, KECUALI milik mahasiswa ini sendiri
         $request->validate([
-            'nim'      => 'required|unique:mahasiswas,nim,' . $id,
-            'nama'     => 'required',
-            'email'    => 'required|email|unique:users,email,' . $mahasiswa->user_id,
-            'prodi'    => 'required',
-            'kelas'    => 'required',
-            'semester' => 'required|numeric'
+            'nim'           => 'required|unique:mahasiswas,nim,' . $id,
+            'nama'          => 'required',
+            'email'         => 'required|email|unique:users,email,' . $mahasiswa->user_id,
+            'prodi'         => 'required',
+            'semester'      => 'required|numeric',
+            'classroom_ids' => 'nullable|array' // 1. Tambahkan ini untuk Many-to-Many
         ]);
 
         try {
@@ -87,25 +92,28 @@ public function update(Request $request, $id)
                 $user->update([
                     'name'     => $request->nama,
                     'email'    => $request->email,
-                    'username' => $request->nim, // Username ikut berubah jika NIM diubah
+                    'username' => $request->nim,
                 ]);
             }
 
             // 2. Update Data Profil (Tabel mahasiswas)
-            // Kita pisahkan email karena email tidak ada di tabel mahasiswas
             $mahasiswa->update([
                 'nim'      => $request->nim,
                 'nama'     => $request->nama,
                 'prodi'    => $request->prodi,
-                'kelas'    => $request->kelas,
                 'semester' => $request->semester,
+                // Kolom 'kelas' string bisa dihapus jika sudah pakai Many-to-Many murni
             ]);
 
+            // 3. UPDATE TABEL PIVOT (Kuncinya di sini Pakdhe!)
+            // Menghubungkan mahasiswa ke banyak kelas sekaligus
+            $mahasiswa->classrooms()->sync($request->input('classroom_ids', []));
+
             DB::commit();
-            return redirect()->back()->with('success', 'Data mahasiswa beserta akun loginnya berhasil diperbarui!');
+            return redirect()->back()->with('success', 'Data mahasiswa dan kelas berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal mengupdate data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
         }
     }
 

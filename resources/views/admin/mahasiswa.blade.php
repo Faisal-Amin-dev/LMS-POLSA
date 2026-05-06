@@ -64,9 +64,10 @@
                                 data-nim="{{ $mhs->nim }}" 
                                 data-nama="{{ $mhs->nama }}" 
                                 data-prodi="{{ $mhs->prodi }}" 
-                                data-kelas="{{ $mhs->kelas }}" 
                                 data-semester="{{ $mhs->semester }}"
                                 data-email="{{ $mhs->user->email ?? '' }}"
+                                {{-- TAMBAHKAN BARIS INI: Mengambil ID saja dari relasi classrooms --}}
+                                data-classrooms="{{ $mhs->classrooms->pluck('id') }}"
                                 data-bs-toggle="modal" data-bs-target="#modalEditMahasiswa">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -162,9 +163,20 @@
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Prodi</label>
                             <input type="text" name="prodi" id="edit_prodi" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
                         </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Kelas</label>
-                            <input type="text" name="kelas" id="edit_kelas" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
+                        <div class="mb-3 col-span-2"> {{-- Gunakan col-span-2 agar lebarnya penuh --}}
+                        <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Daftar Kelas Mahasiswa</label>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                @foreach($classrooms as $cls)
+                                    <div class="flex items-center p-2 hover:bg-white rounded-lg transition-all">
+                                        <input type="checkbox" name="classroom_ids[]" value="{{ $cls->id }}" 
+                                            class="classroom-checkbox w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" 
+                                            id="edit_cls_{{ $cls->id }}">
+                                        <label for="edit_cls_{{ $cls->id }}" class="ml-2 text-sm text-slate-700 cursor-pointer">
+                                            {{ $cls->nama_kelas }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                     <div>
@@ -190,13 +202,29 @@
                 // Set endpoint update
                 document.getElementById('formEditMahasiswa').action = `/admin/mahasiswa/${id}`;
                 
-                // Masukkan data ke input modal
+                // Masukkan data teks ke input modal
                 document.getElementById('edit_nim').value = this.getAttribute('data-nim');
                 document.getElementById('edit_email').value = this.getAttribute('data-email');
                 document.getElementById('edit_nama').value = this.getAttribute('data-nama');
                 document.getElementById('edit_prodi').value = this.getAttribute('data-prodi');
-                document.getElementById('edit_kelas').value = this.getAttribute('data-kelas');
                 document.getElementById('edit_semester').value = this.getAttribute('data-semester');
+
+                // === TAMBAHAN UNTUK MANY-TO-MANY ===
+                
+                // 1. Ambil data ID kelas dari atribut data-classrooms (berupa array JSON)
+                const classrooms = JSON.parse(this.getAttribute('data-classrooms'));
+
+                // 2. Reset semua checkbox kelas di modal edit agar tidak ada sisa centang sebelumnya
+                const allCheckboxes = document.querySelectorAll('#modalEditMahasiswa .classroom-checkbox');
+                allCheckboxes.forEach(cb => cb.checked = false);
+
+                // 3. Centang checkbox yang ID-nya ada dalam daftar kelas mahasiswa tersebut
+                classrooms.forEach(classId => {
+                    const checkbox = document.querySelector(`#modalEditMahasiswa input[value="${classId}"]`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                });
             });
         });
     });

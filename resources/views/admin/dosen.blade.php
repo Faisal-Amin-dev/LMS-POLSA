@@ -63,17 +63,15 @@
                             {{ $dsn->user->email ?? '-' }}
                         </td>
 
-             <td class="px-6 py-4">
-                <div class="flex flex-wrap gap-1">
-                    @forelse($dsn->courses as $c)
-                        <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase rounded border border-blue-100">
-                            {{ $c->nama_mk }}
-                        </span>
-                    @empty
-                        <span class="text-xs text-slate-400 italic">Belum ada matkul diampu</span>
-                    @endforelse
-                </div>
-            </td>
+                        <td class="px-6 py-4">
+                            @forelse($dsn->courses as $course)
+                                <span class="text-[10px] text-blue-600 font-bold uppercase bg-blue-50 px-2 py-0.5 rounded-md inline-block mt-1">
+                                    {{ $course->nama_mk }}
+                                </span>
+                            @empty
+                                <span class="text-xs text-slate-400 italic">Belum ada matkul diampu</span>
+                            @endforelse
+                        </td>
 
                         <td class="px-6 py-4 text-center">
                             @if(($dsn->user->source ?? 'local') == 'siap_polsa')
@@ -189,7 +187,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-3 bg-slate-50 rounded-xl border border-slate-200">
                                     @foreach($courses as $course)
                                     <label class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-slate-100 hover:border-blue-500 cursor-pointer transition-all">
-                                        <input type="checkbox" name="courses[]" value="{{ $course->id }}" 
+                                        <input type="checkbox" name="course_ids[]" value="{{ $course->id }}" 
                                             class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                                             {{ isset($dsn) && $dsn->courses->contains($course->id) ? 'checked' : '' }}>
                                         <span class="text-sm text-slate-700">{{ $course->nama_mk }} (SMT {{ $course->semester }})</span>

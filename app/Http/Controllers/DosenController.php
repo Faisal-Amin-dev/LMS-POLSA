@@ -62,25 +62,36 @@ class DosenController extends Controller
             'nama'  => 'required',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'bidang_keahlian' => 'nullable',
+            'course_ids' => 'nullable|array', // Tambahkan validasi untuk array matkul
         ]);
 
         DB::transaction(function () use ($request, $dosen, $user) {
+            // 1. Update data login di tabel users
             $user->update([
                 'name'     => $request->nama,
                 'email'    => $request->email,
                 'username' => $request->nidn,
             ]);
 
+            // 2. Update data profil di tabel dosens
             $dosen->update([
                 'nidn'            => $request->nidn,
                 'nama'            => $request->nama,
                 'bidang_keahlian' => $request->bidang_keahlian,
             ]);
+
+            // 3. UPDATE TABEL PIVOT (Kuncinya di sini Pakdhe!)
+            // sync() akan mencocokkan data di tabel 'course_dosen' dengan pilihan di modal
+            if ($request->has('course_ids')) {
+                $dosen->courses()->sync($request->course_ids);
+            } else {
+                // Jika tidak ada yang dicentang, kosongkan relasinya
+                $dosen->courses()->sync([]);
+            }
         });
 
-        return redirect()->back()->with('success', 'Data Dosen berhasil diperbarui!');
+        return redirect()->back()->with('success', 'Data Dosen dan Mata Kuliah berhasil diperbarui!');
     }
-
     public function destroy($id)
     {
         $dosen = Dosen::findOrFail($id);
