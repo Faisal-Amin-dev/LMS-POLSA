@@ -19,16 +19,14 @@ class MahasiswaController extends Controller
         $classrooms = \App\Models\Classroom::all();
 
         $query = Mahasiswa::with('user');
-        if ($request->prodi) { $query->where('prodi', $request->prodi); }
+        if ($request->prodi_id) { $query->where('prodi_id', $request->prodi_id); }
         if ($request->semester) { $query->where('semester', $request->semester); }
 
         $mahasiswas = $query->latest()->get();
-        $daftarProdi = [
-            'Teknik Informatika (D3)', 'Administrasi Bisnis (D3)', 
-            'Akuntansi (D3)', 'TRPL (S1 Terapan)', 'Bisnis Digital (S1 Terapan)'
-        ];
 
-        return view('admin.mahasiswa', compact('mahasiswas', 'classrooms', 'daftarProdi'));
+        $prodis = \App\Models\Prodi::all();
+
+        return view('admin.mahasiswa', compact('mahasiswas', 'classrooms','prodis',));
     }
 
     public function store(Request $request)
@@ -36,7 +34,7 @@ class MahasiswaController extends Controller
         $request->validate([
             'nim'      => 'required|unique:mahasiswa,nim',
             'nama'     => 'required',
-            'prodi'    => 'required',
+            'prodi_id'    => 'required',
             'kelas'    => 'required',
             'semester' => 'required|numeric',
             'email'    => 'required|email|unique:users,email',
@@ -57,7 +55,7 @@ class MahasiswaController extends Controller
                 'user_id'  => $user->id,
                 'nim'      => $request->nim,
                 'nama'     => $request->nama,
-                'prodi'    => $request->prodi,
+                'prodi_id'    => $request->prodi_id,
                 'kelas'    => $request->kelas,
                 'semester' => $request->semester,
             ]);
@@ -75,10 +73,10 @@ class MahasiswaController extends Controller
         $mahasiswa = Mahasiswa::findOrFail($id);
 
         $request->validate([
-            'nim'           => 'required|unique:mahasiswas,nim,' . $id,
+            'nim'           => 'required|unique:mahasiswa,nim,' . $id,
             'nama'          => 'required',
             'email'         => 'required|email|unique:users,email,' . $mahasiswa->user_id,
-            'prodi'         => 'required',
+            'prodi_id'      => 'required',
             'semester'      => 'required|numeric',
             'classroom_ids' => 'nullable|array' // 1. Tambahkan ini untuk Many-to-Many
         ]);
@@ -100,7 +98,7 @@ class MahasiswaController extends Controller
             $mahasiswa->update([
                 'nim'      => $request->nim,
                 'nama'     => $request->nama,
-                'prodi'    => $request->prodi,
+                'prodi_id'    => $request->prodi_id,
                 'semester' => $request->semester,
                 // Kolom 'kelas' string bisa dihapus jika sudah pakai Many-to-Many murni
             ]);

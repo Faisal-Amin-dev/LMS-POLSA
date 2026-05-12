@@ -77,6 +77,15 @@
                     </svg>
                     <span class="ml-4 font-medium whitespace-nowrap" x-show="sidebarOpen">Data Mahasiswa</span>
                 </a>
+                <li class="nav-item">
+                    <a href="{{ route('admin.prodi.index') }}" 
+                    class="flex items-center gap-3 px-6 py-3 transition-all duration-200 {{ request()->routeIs('admin.prodi.*') ? 'bg-slate-800 text-white border-l-4 border-yellow-400' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+                        <div class="w-6 flex justify-center">
+                            <i class="fas fa-university"></i>
+                        </div>
+                        <span class="font-medium text-sm">Data Prodi</span>
+                    </a>
+                </li>
 
             </nav>
         </aside>

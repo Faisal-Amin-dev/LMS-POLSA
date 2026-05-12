@@ -10,6 +10,7 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\DosenDashboardController;
 use App\Http\Controllers\MahasiswaDashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProdiController;
 
 // ---------------------------------------------------------
 // 1. GUEST ROUTES (Bisa diakses tanpa login)
@@ -61,6 +62,12 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/course/{id}', [KelasController::class, 'updateCourse'])->name('course.update'); // <--- TAMBAHAN
         Route::delete('/course/{id}', [KelasController::class, 'destroyCourse'])->name('course.destroy'); // <--- TAMBAHAN
 
+        // Manajemen Prodi
+        Route::get('/prodi', [ProdiController::class, 'index'])->name('prodi.index');
+        Route::post('/prodi/sync', [ProdiController::class, 'sync'])->name('prodi.sync');
+        Route::post('/prodi/store', [ProdiController::class, 'store'])->name('prodi.store');
+        Route::put('/prodi/{id}', [ProdiController::class, 'update'])->name('prodi.update');
+        Route::delete('/prodi/{id}', [ProdiController::class, 'destroy'])->name('prodi.destroy');
         
     });
 
@@ -87,5 +94,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:mahasiswa'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
         Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard');
     });
+
+    
 
 });

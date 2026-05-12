@@ -42,7 +42,7 @@
     @endif
 
     <h3 class="text-lg font-bold text-slate-700 mb-3 mt-8"><i class="fas fa-book-open mr-2"></i>Daftar Mata Kuliah Tersedia</h3>
-<div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mb-8 max-h-64 overflow-y-auto">
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mb-8 max-h-64 overflow-y-auto">
         <table class="w-full text-left">
             <thead class="bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider sticky top-0">
                 <tr>
@@ -94,7 +94,6 @@
                 <tr>
                     <th class="px-6 py-4">Matkul & Kelas</th>
                     <th class="px-6 py-4">Dosen Pengampu</th>
-                    <th class="px-6 py-4">Jadwal</th>
                     <th class="px-6 py-4">Peserta</th>
                     <th class="px-6 py-4 text-center">Aksi</th>
                 </tr>
@@ -108,10 +107,6 @@
                     </td>
                     <td class="px-6 py-4 text-sm text-slate-600 font-medium">
                         {{ $k->dosen->nama ?? 'Belum ada dosen' }}
-                    </td>
-                    <td class="px-6 py-4 text-sm">
-                        <span class="block font-bold text-slate-700">{{ $k->hari }}</span>
-                        <span class="text-[11px] text-slate-400">{{ \Carbon\Carbon::parse($k->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($k->jam_selesai)->format('H:i') }}</span>
                     </td>
                     <td class="px-6 py-4">
                         <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold">
@@ -128,7 +123,8 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 italic font-medium">Belum ada kelas. Klik Auto-Sync atau Buat Manual.</td></tr>
+                {{-- Colspan diubah dari 5 menjadi 4 karena 1 kolom (Jadwal) dihapus --}}
+                <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 italic font-medium">Belum ada kelas. Klik Auto-Sync atau Buat Manual.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -165,11 +161,12 @@
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Prodi</label>
                             <select name="prodi" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
-                                <option value="Teknik Informatika (D3)">TI (D3)</option>
-                                <option value="Administrasi Bisnis (D3)">AB (D3)</option>
-                                <option value="Akuntansi (D3)">AK (D3)</option>
-                                <option value="Teknik Rekayasa Perangkat Lunak (S1)">TRPL (S1)</option>
-                                <option value="Bisnis Digital (S1)">BD (S1)</option>
+                                <option value="">-- Pilih Prodi --</option>
+                                @foreach($prodis as $p)
+                                    {{-- Jika database matkul menyimpan ID prodi, gunakan value="{{ $p->id }}" --}}
+                                    {{-- Jika menyimpan nama prodi, gunakan value="{{ $p->nama_prodi }}" --}}
+                                    <option value="{{ $p->nama_prodi }}">{{ $p->nama_prodi }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -214,16 +211,11 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    {{-- Grid diubah dari 3 kolom jadi 2 kolom karena input Hari dihapus --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Nama Kelas LMS</label>
                             <input type="text" name="nama_kelas" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" placeholder="Contoh: TI 4A - PWL" required>
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Hari Kuliah</label>
-                            <select name="hari" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
-                                <option value="Senin">Senin</option><option value="Selasa">Selasa</option><option value="Rabu">Rabu</option><option value="Kamis">Kamis</option><option value="Jumat">Jumat</option><option value="Sabtu">Sabtu</option>
-                            </select>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Tahun Akademik</label>
@@ -231,16 +223,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Jam Mulai</label>
-                            <input type="time" name="jam_mulai" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Jam Selesai</label>
-                            <input type="time" name="jam_selesai" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
-                        </div>
-                    </div>
+                    {{-- Grid Input Jam Mulai dan Jam Selesai TELAH DIHAPUS DARI SINI --}}
 
                     <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
                         <label class="text-xs font-bold text-slate-500 uppercase mb-3 block text-blue-600">Daftarkan Rombongan Kelas (Otomatis Sedot Mahasiswa):</label>
@@ -266,7 +249,6 @@
         </div>
     </div>
 </div>
-
 
 <div class="modal fade" id="modalEditMatkul" tabindex="-1" aria-hidden="true" data-bs-backdrop="false" style="background-color: rgba(0,0,0,0.5);">
     <div class="modal-dialog modal-dialog-centered">
@@ -295,15 +277,16 @@
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Semester</label>
                             <input type="number" name="semester" id="edit_matkul_semester" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
                         </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Prodi</label>
-                            <select name="prodi" id="edit_matkul_prodi" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
-                                <option value="Teknik Informatika (D3)">TI (D3)</option>
-                                <option value="Administrasi Bisnis (D3)">AB (D3)</option>
-                                <option value="Akuntansi (D3)">AK (D3)</option>
-                                <option value="Teknik Rekayasa Perangkat Lunak (S1)">TRPL (S1)</option>
-                                <option value="Bisnis Digital (S1)">BD (S1)</option>
-                            </select>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                            <div>
+                               <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Prodi</label>
+                                <select name="prodi" id="edit_matkul_prodi" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
+                                    <option value="">-- Pilih Prodi --</option>
+                                    @foreach($prodis as $p)
+                                        <option value="{{ $p->nama_prodi }}">{{ $p->nama_prodi }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>

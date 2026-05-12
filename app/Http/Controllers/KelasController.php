@@ -29,11 +29,12 @@ class KelasController extends Controller
 
         $classrooms = $query->latest()->get();
         $dosens = Dosen::all();
+        $prodis = \App\Models\Prodi::all();
         $courses = Course::latest()->get(); // Diurutkan dari yang terbaru
         // Kelompokkan mahasiswa per kelas untuk checkbox di modal
         $mahasiswasGrouped = Mahasiswa::select('kelas', DB::raw('count(*) as total'))->groupBy('kelas')->get();
 
-        return view('admin.kelas', compact('classrooms', 'dosens', 'courses', 'mahasiswasGrouped'));
+        return view('admin.kelas', compact('classrooms', 'dosens', 'prodis', 'courses', 'mahasiswasGrouped'));
     }
 
     // ==========================================
@@ -45,7 +46,7 @@ class KelasController extends Controller
             'kode_mk'  => 'required|unique:courses,kode_mk',
             'nama_mk'  => 'required',
             'sks'      => 'required|numeric',
-            'prodi'    => 'required',
+            'prodi_id'    => 'required',
             'semester' => 'required|numeric',
         ]);
 
@@ -105,9 +106,6 @@ class KelasController extends Controller
             'course_id' => 'required',
             'dosen_id' => 'required',
             'nama_kelas' => 'required',
-            'hari' => 'required',
-            'jam_mulai' => 'required',
-            'jam_selesai' => 'required',
             'tahun_akademik' => 'required',
         ]);
 
@@ -147,7 +145,7 @@ class KelasController extends Controller
             'kode_mk'  => 'required|unique:courses,kode_mk,' . $id,
             'nama_mk'  => 'required',
             'sks'      => 'required|numeric',
-            'prodi'    => 'required',
+            'prodi_id'    => 'required',
             'semester' => 'required|numeric',
         ]);
 

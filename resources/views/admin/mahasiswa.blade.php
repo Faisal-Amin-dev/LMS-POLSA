@@ -51,7 +51,8 @@
                         </div>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="text-sm text-slate-600 font-medium">{{ $mhs->prodi }}</div>
+                        {{-- UBAHAN 1: Menampilkan nama prodi dari relasi --}}
+                        <div class="text-sm text-slate-600 font-medium">{{ $mhs->prodi->nama_prodi ?? 'Belum ada Prodi' }}</div>
                         <div class="text-[10px] text-blue-600 font-bold uppercase bg-blue-50 px-2 py-0.5 rounded-md inline-block mt-1">{{ $mhs->kelas }} - SMT {{ $mhs->semester }}</div>
                     </td>
                     <td class="px-6 py-4 text-sm text-slate-500">
@@ -63,10 +64,10 @@
                                 data-id="{{ $mhs->id }}" 
                                 data-nim="{{ $mhs->nim }}" 
                                 data-nama="{{ $mhs->nama }}" 
-                                data-prodi="{{ $mhs->prodi }}" 
+                                {{-- UBAHAN 2: Mengirim ID prodi, bukan teks prodi --}}
+                                data-prodi-id="{{ $mhs->prodi_id }}" 
                                 data-semester="{{ $mhs->semester }}"
                                 data-email="{{ $mhs->user->email ?? '' }}"
-                                {{-- TAMBAHKAN BARIS INI: Mengambil ID saja dari relasi classrooms --}}
                                 data-classrooms="{{ $mhs->classrooms->pluck('id') }}"
                                 data-bs-toggle="modal" data-bs-target="#modalEditMahasiswa">
                                 <i class="fas fa-edit"></i>
@@ -114,7 +115,13 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Prodi</label>
-                            <input type="text" name="prodi" id="prodi" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
+                            {{-- UBAHAN 3: Form Tambah menggunakan Dropdown Select --}}
+                            <select name="prodi_id" id="prodi_id" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
+                                <option value="">-- Pilih Prodi --</option>
+                                @foreach($prodis as $p)
+                                    <option value="{{ $p->id }}">{{ $p->nama_prodi }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Kelas</label>
@@ -161,9 +168,15 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Prodi</label>
-                            <input type="text" name="prodi" id="edit_prodi" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
+                            {{-- UBAHAN 4: Form Edit menggunakan Dropdown Select --}}
+                            <select name="prodi_id" id="edit_prodi_id" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
+                                <option value="">-- Pilih Prodi --</option>
+                                @foreach($prodis as $p)
+                                    <option value="{{ $p->id }}">{{ $p->nama_prodi }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="mb-3 col-span-2"> {{-- Gunakan col-span-2 agar lebarnya penuh --}}
+                        <div class="mb-3 col-span-2">
                         <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Daftar Kelas Mahasiswa</label>
                             <div class="grid grid-cols-2 md:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
                                 @foreach($classrooms as $cls)
@@ -206,7 +219,10 @@
                 document.getElementById('edit_nim').value = this.getAttribute('data-nim');
                 document.getElementById('edit_email').value = this.getAttribute('data-email');
                 document.getElementById('edit_nama').value = this.getAttribute('data-nama');
-                document.getElementById('edit_prodi').value = this.getAttribute('data-prodi');
+                
+                // UBAHAN 5: Memilih ID Prodi pada dropdown saat Edit ditekan
+                document.getElementById('edit_prodi_id').value = this.getAttribute('data-prodi-id');
+                
                 document.getElementById('edit_semester').value = this.getAttribute('data-semester');
 
                 // === TAMBAHAN UNTUK MANY-TO-MANY ===

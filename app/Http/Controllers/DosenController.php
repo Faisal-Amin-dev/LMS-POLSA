@@ -18,8 +18,12 @@ class DosenController extends Controller
         
         // Mengambil semua matkul yang sudah terdaftar di sistem (hasil API atau input manual)
         $courses = Course::orderBy('nama_mk', 'asc')->get(); 
+
+        // Mengambil semua prodi untuk filter atau informasi tambahan
+        $prodis = \App\Models\Prodi::all();
         
-        return view('admin.dosen', compact('dosens', 'courses'));
+
+        return view('admin.dosen', compact('dosens','prodis', 'courses'));
     }
 
     public function store(Request $request)

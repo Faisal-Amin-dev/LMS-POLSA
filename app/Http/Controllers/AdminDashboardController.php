@@ -15,7 +15,8 @@ class AdminDashboardController extends Controller
         $stats = [
             'total_mahasiswa' => User::where('role', 'mahasiswa')->count(),
             'total_dosen'     => User::where('role', 'dosen')->count(),
-            'mahasiswa_api'   => User::where('role', 'mahasiswa')->where('source', 'siap_polsa')->count(),
+            'total_prodi'     => \App\Models\Prodi::count(),
+            'mahasiswa_api'   => \App\Models\Mahasiswa::whereNotNull('nim')->count(), 
             'mahasiswa_local' => User::where('role', 'mahasiswa')->where('source', 'local')->count(),
         ];
 

@@ -15,7 +15,7 @@ class Mahasiswa extends Model
     protected $fillable = [
         'nim',
         'nama',
-        'prodi',
+        'prodi_id',
         'kelas',
         'semester',
         'user_id'
@@ -28,6 +28,10 @@ class Mahasiswa extends Model
 
     public function classrooms() {
     return $this->belongsToMany(Classroom::class, 'classroom_mahasiswa', 'mahasiswa_id', 'classroom_id');
-}
+    }
+    public function prodi()
+    {
+        return $this->belongsTo(Prodi::class);
+    }
 
 }

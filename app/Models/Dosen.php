@@ -34,4 +34,8 @@ class Dosen extends Model
     {
         return $this->belongsToMany(Course::class, 'course_dosen');
     }
+    public function prodi()
+    {
+        return $this->belongsTo(Prodi::class);
+    }
 }
