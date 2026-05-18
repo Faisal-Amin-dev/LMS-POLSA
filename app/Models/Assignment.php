@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Assignment extends Model
 {
     protected $fillable = [
-        'course_id', 
+        'classroom_id', 
         'title', 
         'description', 
         'deadline', 
@@ -24,8 +24,8 @@ class Assignment extends Model
     }
 
     // Relasi balik ke Kelas
-    public function course()
+    public function classroom()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Classroom::class);
     }
 }

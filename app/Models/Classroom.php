@@ -19,4 +19,19 @@ class Classroom extends Model
     public function mahasiswas() {
         return $this->belongsToMany(Mahasiswa::class, 'classroom_mahasiswa', 'classroom_id', 'mahasiswa_id');
     }
+
+    public function assignments()
+    {
+        return $this->hasMany(\App\Models\Assignment::class, 'classroom_id');
+    }
+
+    public function materials()
+    {
+        return $this->hasMany(\App\Models\Material::class, 'classroom_id');
+    }
+
+    public function announcements()
+    {
+        return $this->hasMany(\App\Models\Announcement::class, 'classroom_id');
+    }
 }

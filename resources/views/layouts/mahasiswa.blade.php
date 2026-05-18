@@ -6,7 +6,7 @@
     <title>@yield('title', 'Mahasiswa Dashboard') - SERAP</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -83,8 +83,14 @@
                             <p class="text-sm font-semibold text-slate-700">{{ Auth::user()->name ?? 'Administrator' }}</p>
                             <p class="text-xs text-slate-500">Admin Kampus</p>
                         </div>
-                        <div class="h-10 w-10 rounded-full bg-polsa text-slate-900 flex items-center justify-center font-bold text-lg border-2 border-white shadow-sm">
-                            {{ substr(Auth::user()->name ?? 'A', 0, 1) }}
+                        <div class="h-9 w-9 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
+                            @if(Auth::user()->foto)
+                                <img src="{{ Storage::url(Auth::user()->foto) }}" class="h-full w-full object-cover">
+                            @else
+                                <div class="h-full w-full flex items-center justify-center text-slate-500 bg-slate-100">
+                                    <i class="fas fa-user text-sm"></i>
+                                </div>
+                            @endif
                         </div>
                     </button>
 
@@ -97,10 +103,9 @@
                          x-transition:leave-end="transform opacity-0 scale-95"
                          class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 border border-slate-100" style="display: none;">
                         
-                        <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-polsa-dark">
-                            <svg class="inline-block w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                            Pengaturan
-                        </a>
+                       <button type="button" data-bs-toggle="modal" data-bs-target="#modalPengaturanProfil" class="flex items-center w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-all gap-2">
+                            <i class="fas fa-cog text-slate-400"></i> Pengaturan
+                        </button>
                         
                         <div class="border-t border-slate-100 my-1"></div>
                         
@@ -120,6 +125,58 @@
             </div>
             
         </main>
+    </div>
+    <div class="modal fade" id="modalPengaturanProfil" tabindex="-1" aria-hidden="true" data-bs-backdrop="false" style="background-color: rgba(0,0,0,0.5); z-index: 9999;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-3xl border-none shadow-2xl">
+                <div class="modal-header border-none p-6 pb-0">
+                    <h5 class="text-xl font-bold text-slate-800">Pengaturan Akun</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body p-6">
+                        
+                        <div class="mb-4">
+                            <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">Username / Email (Tidak dapat diubah)</label>
+                            <input type="text" class="w-full bg-slate-100 border border-slate-200 px-4 py-2.5 rounded-xl text-sm text-slate-500 font-mono" value="{{ Auth::user()->email }}" disabled>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Foto Profil Baru</label>
+                            <div class="flex items-center gap-4">
+                                <div class="h-14 w-14 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                    @if(Auth::user()->foto)
+                                        <img src="{{ Storage::url(Auth::user()->foto) }}" class="h-full w-full object-cover">
+                                    @else
+                                        <i class="fas fa-user text-slate-400 text-xl"></i>
+                                    @endif
+                                </div>
+                                <input type="file" name="foto" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
+                            </div>
+                        </div>
+
+                        <hr class="border-slate-100 my-4">
+
+                        <div class="mb-4">
+                            <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Password Baru</label>
+                            <input type="password" name="password" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Kosongkan jika tidak ingin mengubah">
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Konfirmasi Password Baru</label>
+                            <input type="password" name="password_confirmation" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Ulangi password baru">
+                        </div>
+
+                    </div>
+                    <div class="modal-footer border-none p-6 pt-0 flex gap-2">
+                        <button type="button" class="flex-1 py-3 text-slate-500 font-bold hover:bg-slate-50 rounded-xl" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @stack('modals')

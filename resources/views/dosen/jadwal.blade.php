@@ -1,52 +1,54 @@
 @extends('layouts.dosen')
 
-@section('title', 'Jadwal Praktikum')
-@section('header_title', 'Jadwal Praktikum Mingguan')
+@section('title', 'Agenda LMS')
+@section('header_title', 'Agenda Penugasan Mahasiswa')
 
 @section('content')
 <div class="space-y-6">
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-            <h2 class="text-xl font-bold text-slate-800">Agenda Mengajar</h2>
-            <p class="text-sm text-slate-500">Daftar jadwal praktikum aktif Anda di semester ini.</p>
+            <h2 class="text-xl font-bold text-slate-800"><i class="fas fa-tasks text-indigo-600 mr-2"></i>Agenda & Batas Waktu Tugas</h2>
+            <p class="text-sm text-slate-500">Pantau seluruh tugas praktikum aktif yang dilepas ke mahasiswa berdasarkan urutan tenggat waktu.</p>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="text-slate-400 text-xs uppercase tracking-wider">
-                        <th class="p-4 font-bold border-b">Hari</th>
-                        <th class="p-4 font-bold border-b">Mata Kuliah</th>
-                        <th class="p-4 font-bold border-b">Jam</th>
-                        <th class="p-4 font-bold border-b">Ruangan</th>
-                        <th class="p-4 font-bold border-b">Aksi</th>
+                    <tr class="text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-100 bg-slate-50/30">
+                        <th class="px-6 py-4">Mata Kuliah & Kelas</th>
+                        <th class="px-6 py-4">Judul Tugas Praktikum</th>
+                        <th class="px-6 py-4">Tenggat Waktu (Deadline)</th>
+                        <th class="px-6 py-4 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    @forelse($jadwal as $j)
+                    @forelse($jadwal as $task)
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="p-4">
-                            <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold">
-                                {{ $j->day }}
+                        <td class="px-6 py-4">
+                            <span class="block font-bold text-slate-800">{{ $task->classroom->course->nama_mk ?? '-' }}</span>
+                            <span class="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-md uppercase inline-block mt-1">
+                                Grup: {{ $task->classroom->nama_kelas ?? '-' }}
                             </span>
                         </td>
-                        <td class="p-4 font-bold text-slate-800">{{ $j->course->course_name }}</td>
-                        <td class="p-4 text-sm text-slate-600">
-                            {{ \Carbon\Carbon::parse($j->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($j->end_time)->format('H:i') }}
+                        <td class="px-6 py-4 font-medium text-slate-700">
+                            {{ $task->title }}
                         </td>
-                        <td class="p-4 text-sm text-slate-500">
-                            <div class="flex items-center">
-                                <svg class="w-4 h-4 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke-width="2"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2"/></svg>
-                                {{ $j->room }}
-                            </div>
+                        <td class="px-6 py-4 text-sm text-slate-600 font-mono">
+                            <i class="far fa-clock text-slate-400 mr-1.5"></i>
+                            {{ \Carbon\Carbon::parse($task->deadline)->translatedFormat('d M Y - H:i') }} WIB
                         </td>
-                        <td class="p-4">
-                            <a href="{{ route('dosen.kelas.show', $j->course_id) }}" class="text-blue-600 hover:text-blue-800 text-sm font-bold">Masuk Kelas</a>
+                        <td class="px-6 py-4 text-center">
+                            <a href="{{ route('dosen.kelas.show', ['id' => $task->classroom_id, 'tab' => 'nilai']) }}" class="inline-flex items-center text-indigo-600 hover:text-indigo-900 text-xs font-bold transition-all bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-xl">
+                                Periksa Lembar Kerja <i class="fas fa-chevron-right ml-1.5 text-[10px]"></i>
+                            </a>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="p-10 text-center text-slate-400 italic">Belum ada jadwal yang diinput.</td>
+                        <td colspan="4" class="px-6 py-16 text-center text-slate-400 italic font-medium">
+                            <div class="text-3xl text-slate-300 mb-2"><i class="fas fa-calendar-check"></i></div>
+                            Tidak ada agenda tugas aktif dalam waktu dekat ini.
+                        </td>
                     </tr>
                     @endforelse
                 </tbody>

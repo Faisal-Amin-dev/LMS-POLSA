@@ -11,7 +11,7 @@ class Announcement extends Model
      * Kita izinkan course_id, user_id, dan content.
      */
     protected $fillable = [
-        'course_id', 
+        'classroom_id', 
         'user_id', 
         'content'
     ];
@@ -20,5 +20,11 @@ class Announcement extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Relasi ke Kelas
+    public function classroom()
+    {
+        return $this->belongsTo(Classroom::class);
     }
 }

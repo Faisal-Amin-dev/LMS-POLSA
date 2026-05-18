@@ -37,62 +37,55 @@ class KelasController extends Controller
         return view('admin.kelas', compact('classrooms', 'dosens', 'prodis', 'courses', 'mahasiswasGrouped'));
     }
 
-    // ==========================================
-    // 2. SIMPAN MATA KULIAH MANUAL
-    // ==========================================
-    public function storeCourse(Request $request)
-    {
-        $request->validate([
-            'kode_mk'  => 'required|unique:courses,kode_mk',
-            'nama_mk'  => 'required',
-            'sks'      => 'required|numeric',
-            'prodi_id'    => 'required',
-            'semester' => 'required|numeric',
-        ]);
-
-        Course::create($request->all());
-        return redirect()->back()->with('success', 'Mata Kuliah baru berhasil disimpan!');
-    }
-
-    // ==========================================
-    // 3. RAKIT KELAS MANUAL
+   // ==========================================
+    // 3. RAKIT KELAS MANUAL (VERSI FIX GABUNGAN)
     // ==========================================
     public function store(Request $request)
     {
+        // 1. Validasi data esensial LMS Online (Bebas hari & jam fisik)
         $request->validate([
-            'course_id' => 'required', 
-            'dosen_id' => 'required', 
-            'nama_kelas' => 'required',
-            'hari' => 'required',
-            'jam_mulai' => 'required',
-            'jam_selesai' => 'required',
-            'tahun_akademik' => 'required',
-            'target_kelas' => 'nullable|array' // Rombongan mahasiswa (bisa dikosongkan)
+            'course_id' => 'required',
+            'dosen_id' => 'required',
+            'nama_kelas' => 'required|string|max:255',
+            'tahun_akademik' => 'required|string',
         ]);
 
         try {
-            DB::beginTransaction();
+            // Gunakan Database Transaction agar jika salah satu proses gagal, data tidak rusak/setengah masuk
+            \Illuminate\Support\Facades\DB::beginTransaction();
 
-            // A. Buat Kelasnya (kecuali target_kelas karena bukan kolom di tabel classroom)
-            $kelas = Classroom::create($request->except('target_kelas'));
+            // 2. Siapkan array data gabungan dengan menyisipkan nilai null pada kolom fisik lama
+            $dataKelas = array_merge($request->except('target_kelas'), [
+                'status' => 'aktif',
+                'hari' => null,
+                'jam_mulai' => null,
+                'jam_selesai' => null,
+            ]);
 
-            // B. Hubungkan Dosen dengan Matkul yang dipilih (Agar masuk ke Profil Dosen)
-            $dosen = Dosen::find($request->dosen_id);
+            // A. Buat Kelas LMS Baru
+            $kelas = \App\Models\Classroom::create($dataKelas);
+
+            // B. Hubungkan Dosen dengan Matkul yang dipilih (Agar masuk ke daftar matkul di Profil Dosen)
+            $dosen = \App\Models\Dosen::find($request->dosen_id);
             if ($dosen) {
-                // syncWithoutDetaching mencegah matkul lama terhapus
+                // syncWithoutDetaching mencegah relasi matkul lama milik dosen terhapus
                 $dosen->courses()->syncWithoutDetaching([$request->course_id]);
             }
 
-            // C. Masukkan Mahasiswa berdasarkan Rombongan yang dicentang
+            // C. OTOMATISASI ROMBEL: Sedot Mahasiswa berdasarkan Rombongan kelas yang dicentang
             if ($request->has('target_kelas')) {
-                $mahasiswaIds = Mahasiswa::whereIn('kelas', $request->target_kelas)->pluck('id');
+                $mahasiswaIds = \App\Models\Mahasiswa::whereIn('kelas', $request->target_kelas)->pluck('id');
                 $kelas->mahasiswas()->attach($mahasiswaIds);
             }
 
-            DB::commit();
-            return redirect()->back()->with('success', 'Kelas LMS Manual berhasil dirakit!');
+            // Jika semua langkah A, B, C sukses tanpa interupsi, kunci data ke database
+            \Illuminate\Support\Facades\DB::commit();
+            
+            return redirect()->back()->with('success', 'Kelas LMS Manual berhasil dirakit dan rombel otomatis disedot!');
+
         } catch (\Exception $e) {
-            DB::rollBack();
+            // Jika ada satu saja yang gagal/error, batalkan semua proses di atas agar database tetap bersih
+            \Illuminate\Support\Facades\DB::rollBack();
             return redirect()->back()->with('error', 'Gagal buat kelas manual: ' . $e->getMessage());
         }
     }

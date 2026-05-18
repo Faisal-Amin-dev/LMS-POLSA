@@ -11,6 +11,8 @@ use App\Http\Controllers\DosenDashboardController;
 use App\Http\Controllers\MahasiswaDashboardController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProdiController;
+use App\Http\Controllers\AkademikController;
+use App\Http\Controllers\ProfileController;
 
 // ---------------------------------------------------------
 // 1. GUEST ROUTES (Bisa diakses tanpa login)
@@ -27,6 +29,8 @@ Route::get('/tes-nyawa', function() { return "<h1>HALO PAKDHE, SAYA HIDUP!</h1>"
 // 2. AUTH ROUTES (Harus login dulu)
 // ---------------------------------------------------------
 Route::middleware(['auth'])->group(function () {
+    // Rute untuk update profil (bisa diakses oleh semua role)
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
     // ==========================================
     // GROUP KHUSUS ADMIN (Manajemen Data)
@@ -68,6 +72,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/prodi/store', [ProdiController::class, 'store'])->name('prodi.store');
         Route::put('/prodi/{id}', [ProdiController::class, 'update'])->name('prodi.update');
         Route::delete('/prodi/{id}', [ProdiController::class, 'destroy'])->name('prodi.destroy');
+
+        // Manajemen Akademik (Ganti Tahun Ajaran & Arsip Otomatis)
+        Route::get('/akademik', [AkademikController::class, 'index'])->name('akademik.index');
+        Route::post('/akademik/ganti-tahun', [AkademikController::class, 'gantiTahunAkademik'])->name('akademik.gantiTahun');
         
     });
 
@@ -86,6 +94,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/announcement', [DosenDashboardController::class, 'storeAnnouncement'])->name('announcement.store');
         Route::post('/assignment/store', [DosenDashboardController::class, 'storeAssignment'])->name('assignment.store');
         Route::post('/kelas/store', [DosenDashboardController::class, 'storeKelas'])->name('kelas.store');
+
+        //Rute arsip kelas
+        Route::get('/kelas-diarsip', [DosenDashboardController::class, 'kelasArsip'])->name('kelas.arsip');
     });
 
     // ==========================================

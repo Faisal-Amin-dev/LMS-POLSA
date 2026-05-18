@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Material extends Model
 {
-  protected $fillable = ['course_id', 'title', 'description', 'file_path'];
+  protected $fillable = ['classroom_id', 'title', 'description', 'file_path'];
 
-    public function Course() {
-        return $this->belongsTo(Course::class);
+    public function Classroom() {
+        return $this->belongsTo(Classroom::class);
     }
 }
