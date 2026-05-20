@@ -15,7 +15,7 @@
 
 <div class="mb-6">
     <h2 class="text-2xl font-bold text-slate-800">Selamat Datang, {{ Auth::user()->name ?? 'Pakdhe' }}!</h2>
-    <p class="text-slate-600">Pusat kendali My Polsa — Data terpantau secara real-time.</p>
+    <p class="text-slate-600">Pusat kendali SERAP — Data terpantau secara real-time.</p>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -36,7 +36,7 @@
             @endphp
             <div class="bg-blue-600 h-1.5 rounded-full" style="width: {{ $persentaseApi }}%"></div>
         </div>
-        <p class="text-[10px] text-slate-400">Terdaftar di sistem My Polsa</p>
+        <p class="text-[10px] text-slate-400">Terdaftar di SERAP</p>
     </div>
 
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
