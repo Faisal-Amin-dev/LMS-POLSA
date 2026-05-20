@@ -37,7 +37,7 @@
             
             <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-800">
                 <span class="font-bold text-polsa text-xl tracking-wider" x-show="sidebarOpen">SERAP</span>
-                <span class="font-bold text-polsa text-xl tracking-wider" x-show="!sidebarOpen">SRP</span>
+                <i class="fas fa-bars text-polsa text-xl cursor-pointer" x-show="!sidebarOpen" @click="sidebarOpen = true"></i>
             </div>
 
             <button @click="sidebarOpen = !sidebarOpen" class="absolute -right-3 top-20 bg-polsa text-slate-900 rounded-full p-1 shadow-md hover:bg-polsa-hover">

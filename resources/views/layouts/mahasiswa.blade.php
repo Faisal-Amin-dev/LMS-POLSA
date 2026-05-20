@@ -37,7 +37,7 @@
             
             <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-800">
                 <span class="font-bold text-polsa text-xl tracking-wider" x-show="sidebarOpen">SERAP</span>
-                <span class="font-bold text-polsa text-xl tracking-wider" x-show="!sidebarOpen">SRP</span>
+                <i class="fas fa-bars text-polsa text-xl cursor-pointer" x-show="!sidebarOpen" @click="sidebarOpen = true"></i>
             </div>
 
             <button @click="sidebarOpen = !sidebarOpen" class="absolute -right-3 top-20 bg-polsa text-slate-900 rounded-full p-1 shadow-md hover:bg-polsa-hover">
@@ -46,16 +46,27 @@
                 </svg>
             </button>
 
-            {{-- Bagian Navigasi yang Diubah untuk Mahasiswa --}}
-            <nav class="mt-4">
-                <a href="{{ route('mahasiswa.dashboard') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-blue-700 {{ request()->routeIs('mahasiswa.dashboard') ? 'bg-blue-800' : '' }}">
-                    <i class="fas fa-home mr-2"></i> Dashboard
+            {{-- 4 Menu Utama Mahasiswa (Mata Kuliah Dihapus, Diganti Agenda & Arsip) --}}
+            <nav class="mt-4 flex-1 overflow-y-auto py-2 space-y-1 px-2">
+                <a href="{{ route('mahasiswa.dashboard') }}" class="flex items-center py-2.5 px-3 rounded transition duration-200 hover:bg-blue-700 {{ request()->routeIs('mahasiswa.dashboard') || request()->routeIs('mahasiswa.kelas.show') ? 'bg-blue-800 text-white' : 'text-slate-300' }}">
+                    <div class="w-6 h-6 flex-shrink-0 flex items-center justify-center">
+                        <i class="fas fa-home text-lg"></i>
+                    </div>
+                    <span class="ml-3 font-medium whitespace-nowrap" x-show="sidebarOpen">Beranda Kelas</span>
                 </a>
-                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-blue-700">
-                    <i class="fas fa-book mr-2"></i> Mata Kuliah Aktif
+
+                <a href="{{ route('mahasiswa.agenda') }}" class="flex items-center py-2.5 px-3 rounded transition duration-200 hover:bg-blue-700 {{ request()->routeIs('mahasiswa.agenda') ? 'bg-blue-800 text-white' : 'text-slate-300' }}">
+                    <div class="w-6 h-6 flex-shrink-0 flex items-center justify-center">
+                        <i class="fas fa-tasks text-lg"></i>
+                    </div>
+                    <span class="ml-3 font-medium whitespace-nowrap" x-show="sidebarOpen">Agenda Tugas</span>
                 </a>
-                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-blue-700">
-                    <i class="fas fa-graduation-cap mr-2"></i> Nilai & KHS
+
+                <a href="{{ route('mahasiswa.krs') }}" class="flex items-center py-2.5 px-3 rounded transition duration-200 hover:bg-blue-700 {{ request()->routeIs('mahasiswa.krs') ? 'bg-blue-800 text-white' : 'text-slate-300' }}">
+                    <div class="w-6 h-6 flex-shrink-0 flex items-center justify-center">
+                        <i class="fas fa-file-signature text-lg"></i>
+                    </div>
+                    <span class="ml-3 font-medium whitespace-nowrap" x-show="sidebarOpen">KRS & Akademik</span>
                 </a>
             </nav>
         </aside>
@@ -80,8 +91,8 @@
                 <div class="relative" @click.away="profileOpen = false">
                     <button @click="profileOpen = !profileOpen" class="flex items-center space-x-3 focus:outline-none">
                         <div class="text-right hidden md:block">
-                            <p class="text-sm font-semibold text-slate-700">{{ Auth::user()->name ?? 'Administrator' }}</p>
-                            <p class="text-xs text-slate-500">Admin Kampus</p>
+                            <p class="text-sm font-semibold text-slate-700">{{ Auth::user()->name ?? Auth::user()->username }}</p>
+                            <p class="text-xs text-slate-500">Mahasiswa</p>
                         </div>
                         <div class="h-9 w-9 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
                             @if(Auth::user()->foto)
@@ -140,7 +151,7 @@
                         
                         <div class="mb-4">
                             <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">Username / Email (Tidak dapat diubah)</label>
-                            <input type="text" class="w-full bg-slate-100 border border-slate-200 px-4 py-2.5 rounded-xl text-sm text-slate-500 font-mono" value="{{ Auth::user()->email }}" disabled>
+                            <input type="text" class="w-full bg-slate-100 border border-slate-200 px-4 py-2.5 rounded-xl text-sm text-slate-500 font-mono" value="{{ Auth::user()->email ?? Auth::user()->username }}" disabled>
                         </div>
 
                         <div class="mb-4">
