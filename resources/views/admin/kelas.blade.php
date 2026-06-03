@@ -68,7 +68,7 @@
                                 data-nama="{{ $c->nama_mk }}" 
                                 data-sks="{{ $c->sks }}" 
                                 data-semester="{{ $c->semester }}" 
-                                data-prodi="{{ $c->prodi }}"
+                                data-prodi="{{ $c->kurikulum_id ?? '' }}"
                                 data-bs-toggle="modal" data-bs-target="#modalEditMatkul">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -87,7 +87,7 @@
         </table>
     </div>
 
-    <h3 class="text-lg font-bold text-slate-700 mb-3"><i class="fas fa-chalkboard-teacher mr-2"></i>Daftar Kelas LMS Aktif</h3>
+    <h3 class="text-lg font-bold text-slate-700 mb-3"><i class="fas fa-chalkboard-teacher mr-2"></i>Daftar Kelas LMS Aktif (Sesi Berjalan)</h3>
     <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
         <table class="w-full text-left">
             <thead class="bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
@@ -95,6 +95,7 @@
                     <th class="px-6 py-4">Matkul & Kelas</th>
                     <th class="px-6 py-4">Dosen Pengampu</th>
                     <th class="px-6 py-4">Peserta</th>
+                    <th class="px-6 py-4 text-center">Status</th>
                     <th class="px-6 py-4 text-center">Aksi</th>
                 </tr>
             </thead>
@@ -113,6 +114,18 @@
                             {{ $k->mahasiswas->count() }} Mahasiswa
                         </span>
                     </td>
+                    <!-- UPDATE REVISI: Penambahan Badge Status Aktif Real-Time -->
+                    <td class="px-6 py-4 text-center">
+                        @if(($k->status ?? 'aktif') == 'aktif')
+                            <span class="px-2.5 py-1 bg-green-50 text-green-600 rounded-lg text-[10px] font-black border border-green-100 uppercase tracking-wider">
+                                <i class="fas fa-circle text-[8px] mr-1 align-middle"></i> Aktif
+                            </span>
+                        @else
+                            <span class="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-black border border-slate-200 uppercase tracking-wider">
+                                <i class="fas fa-circle text-[8px] mr-1 align-middle"></i> Non-Aktif
+                            </span>
+                        @endif
+                    </td>
                     <td class="px-6 py-4 text-center">
                         <form action="{{ route('admin.kelas.destroy', $k->id) }}" method="POST">
                             @csrf @method('DELETE')
@@ -123,24 +136,34 @@
                     </td>
                 </tr>
                 @empty
-                {{-- Colspan diubah dari 5 menjadi 4 karena 1 kolom (Jadwal) dihapus --}}
-                <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 italic font-medium">Belum ada kelas. Klik Auto-Sync atau Buat Manual.</td></tr>
+                {{-- UPDATE REVISI: Colspan dinaikkan dari 4 menjadi 5 karena ada penambahan kolom status --}}
+                <tr><td colspan="5" class="px-6 py-12 text-center text-slate-400 italic font-medium">Belum ada kelas. Klik Auto-Sync atau Buat Manual.</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 </div>
 
-<div class="modal fade" id="modalTambahMatkul" tabindex="-1" aria-hidden="true" data-bs-backdrop="false" style="background-color: rgba(0,0,0,0.5);">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-3xl border-none shadow-2xl">
-            <div class="modal-header border-none p-6 pb-0">
+<!-- MODAL INPUT MATA KULIAH BARU -->
+<div class="modal fade fixed inset-0 z-[1055] hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm" id="modalTambahMatkul" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered relative w-auto pointer-events-none max-w-md mx-auto">
+        <div class="modal-content border-none shadow-2xl relative flex flex-col w-full pointer-events-auto bg-white rounded-3xl bg-clip-padding outline-none text-current">
+            <div class="modal-header flex flex-shrink-0 items-center justify-between p-6 pb-0 border-none rounded-t-3xl">
                 <h5 class="text-xl font-bold text-slate-800">Input Mata Kuliah Baru</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('admin.course.store') }}" method="POST">
                 @csrf
-                <div class="modal-body p-6">
+                <div class="modal-body relative p-6">
+                    <div class="mb-4">
+                        <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Pilih Program Studi Asal</label>
+                        <select name="prodi_id" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" required>
+                            <option value="">-- Pilih Prodi --</option>
+                            @foreach($prodis as $p)
+                                <option value="{{ $p->id }}">{{ $p->nama_prodi }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="mb-4">
                         <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Kode Matkul</label>
                         <input type="text" name="kode_mk" placeholder="Contoh: INF101" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
@@ -149,7 +172,7 @@
                         <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Nama Matkul Lengkap</label>
                         <input type="text" name="nama_mk" placeholder="Contoh: Algoritma Pemrograman" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
+                    <div class="grid grid-cols-2 gap-4 mb-2">
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">SKS</label>
                             <input type="number" name="sks" placeholder="3" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
@@ -157,17 +180,6 @@
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Semester</label>
                             <input type="number" name="semester" placeholder="1-8" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Prodi</label>
-                            <select name="prodi" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
-                                <option value="">-- Pilih Prodi --</option>
-                                @foreach($prodis as $p)
-                                    {{-- Jika database matkul menyimpan ID prodi, gunakan value="{{ $p->id }}" --}}
-                                    {{-- Jika menyimpan nama prodi, gunakan value="{{ $p->nama_prodi }}" --}}
-                                    <option value="{{ $p->nama_prodi }}">{{ $p->nama_prodi }}</option>
-                                @endforeach
-                            </select>
                         </div>
                     </div>
                 </div>
@@ -180,10 +192,11 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalTambahKelas" tabindex="-1" aria-hidden="true" data-bs-backdrop="false" style="background-color: rgba(0,0,0,0.5);">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-3xl border-none shadow-2xl">
-            <div class="modal-header border-none p-6 pb-0">
+<!-- MODAL PEMBENTUKAN KELAS MANUAL -->
+<div class="modal fade fixed inset-0 z-[1055] hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm" id="modalTambahKelas" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
+    <div class="modal-dialog modal-lg modal-dialog-centered relative w-auto pointer-events-none max-w-4xl mx-auto">
+        <div class="modal-content border-none shadow-2xl relative flex flex-col w-full pointer-events-auto bg-white rounded-3xl bg-clip-padding outline-none text-current">
+            <div class="modal-header border-none p-6 pb-0 rounded-t-3xl">
                 <h5 class="text-xl font-bold text-slate-800">Pembentukan Kelas Baru</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -211,7 +224,6 @@
                         </div>
                     </div>
 
-                    {{-- Grid diubah dari 3 kolom jadi 2 kolom karena input Hari dihapus --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Nama Kelas LMS</label>
@@ -222,8 +234,6 @@
                             <input type="text" name="tahun_akademik" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" value="2025/2026" required>
                         </div>
                     </div>
-
-                    {{-- Grid Input Jam Mulai dan Jam Selesai TELAH DIHAPUS DARI SINI --}}
 
                     <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
                         <label class="text-xs font-bold text-slate-500 uppercase mb-3 block text-blue-600">Daftarkan Rombongan Kelas (Otomatis Sedot Mahasiswa):</label>
@@ -250,10 +260,11 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalEditMatkul" tabindex="-1" aria-hidden="true" data-bs-backdrop="false" style="background-color: rgba(0,0,0,0.5);">
-    <div class="modal-dialog modal-dialog-centered">
+<!-- MODAL EDIT MATA KULIAH -->
+<div class="modal fade fixed inset-0 z-[1055] hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm" id="modalEditMatkul" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered relative w-auto pointer-events-none max-w-md mx-auto">
         <div class="modal-content rounded-3xl border-none shadow-2xl">
-            <div class="modal-header border-none p-6 pb-0">
+            <div class="modal-header border-none p-6 pb-0 rounded-t-3xl">
                 <h5 class="text-xl font-bold text-blue-600">Edit Mata Kuliah</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -268,7 +279,7 @@
                         <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Nama Matkul</label>
                         <input type="text" name="nama_mk" id="edit_matkul_nama" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
                     </div>
-                    <div class="grid grid-cols-3 gap-3">
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">SKS</label>
                             <input type="number" name="sks" id="edit_matkul_sks" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
@@ -276,17 +287,6 @@
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Semester</label>
                             <input type="number" name="semester" id="edit_matkul_semester" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                            <div>
-                               <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Prodi</label>
-                                <select name="prodi" id="edit_matkul_prodi" class="w-full bg-white border border-slate-300 px-4 py-2.5 rounded-xl text-sm" required>
-                                    <option value="">-- Pilih Prodi --</option>
-                                    @foreach($prodis as $p)
-                                        <option value="{{ $p->nama_prodi }}">{{ $p->nama_prodi }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
                         </div>
                     </div>
                 </div>

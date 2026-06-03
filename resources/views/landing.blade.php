@@ -70,7 +70,7 @@
             
             <div class="flex-1 text-center lg:text-left text-white fade-in visible">
                 <span class="inline-block py-1 px-3 rounded-full bg-blue-800/50 border border-blue-400/30 text-blue-200 text-sm font-semibold mb-6">
-                    Tahun Akademik 2025/2026
+                    Tahun Akademik {{ $semAktif ? $semAktif->tahun_akademik . ' (' . $semAktif->semester . ')' : '2025/2026' }}
                 </span>
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
                     Portal Akademik <br />

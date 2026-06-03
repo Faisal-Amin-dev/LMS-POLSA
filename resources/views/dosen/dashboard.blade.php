@@ -12,7 +12,8 @@
        
         <button type="button" data-bs-toggle="modal" data-bs-target="#modalBuatKelas" class="text-slate-900 font-bold py-2.5 px-4 rounded-xl shadow-md flex items-center transition-all hover:bg-yellow-500" style="background-color: #FFD700;">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M12 4v16m8-8H4\" />
+                <!-- FIX NO MISTAKE: Backslash pengganggu pada atribut SVG telah dibersihkan -->
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             Buat Kelas LMS Manual
         </button>
@@ -61,6 +62,170 @@
         @endforelse
     </div>
 
+    <!-- ========================================================= -->
+    <!-- REVISI DOSEN: SEKSI MONITORING SPESIAL JABATAN KAPRODI    -->
+    <!-- ========================================================= -->
+    @if(isset($dosen) && $dosen->jabatan == 'Kaprodi')
+    <div class="mt-12 bg-slate-900 rounded-3xl p-6 md:p-8 shadow-xl text-white">
+        <div class="mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 bg-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center text-lg border border-amber-500/30 shadow-inner">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-black tracking-tight text-white">Akses Kaprodi: Monitoring Dokumen Mutu</h3>
+                        <p class="text-slate-400 text-xs mt-0.5">Memantau unggahan berkas Kontrak Kuliah & RPS seluruh dosen internal program studi Anda.</p>
+                    </div>
+                </div>
+                <div class="bg-white/10 px-4 py-2 rounded-2xl border border-white/5 text-right flex flex-col justify-center shrink-0">
+                    <span class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Tahun Ajaran Sesi</span>
+                    <span class="text-xs font-mono font-bold text-amber-400">{{ session('tahun_akademik_nama') ?? 'Sesi Hack' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto rounded-2xl border border-white/10 bg-white/5">
+            <table class="w-full text-left border-collapse text-sm text-slate-300">
+                <thead>
+                    <tr class="bg-white/5 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-white/10">
+                        <th class="px-6 py-4">Mata Kuliah / Ruang Kelas</th>
+                        <th class="px-6 py-4">Dosen Pengampu</th>
+                        <th class="px-6 py-4 text-center">Status RPS & Kontrak</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    @forelse($monitoringProdi as $m)
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4 font-bold text-white">
+                            {{ $m->nama_mk }}
+                            <div class="text-[10px] text-blue-400 font-mono font-normal mt-0.5">{{ $m->kode_mk }} - Kelas {{ $m->nama_kelas }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-slate-300 font-medium">{{ $m->nama_dosen }}</td>
+                        <td class="px-6 py-4 text-center">
+                            @if($m->file_rps)
+                                <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-bold border border-green-500/30">
+                                    <i class="fas fa-check-circle mr-1"></i> RPS Aman
+                                </span>
+                            @else
+                                <span class="px-3 py-1 bg-rose-500/20 text-rose-400 rounded-full text-xs font-bold border border-rose-500/30 animate-pulse">
+                                    <i class="fas fa-times-circle mr-1"></i> Belum Upload RPS
+                                </span>
+                            @endif
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="3" class="px-6 py-12 text-center text-slate-500 italic">
+                            <i class="fas fa-clipboard-list text-2xl mb-2 text-slate-600 block"></i>
+                            Belum ada rombel kelas daring yang berjalan di prodi Anda untuk sesi semester ini.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    <!-- ========================================================= -->
+    <!-- REVISI DOSEN: SEKSI AUDIT MUTU GLOBAL JABATAN BPMI        -->
+    <!-- ========================================================= -->
+    @if(isset($dosen) && $dosen->jabatan == 'BPM')
+    <div class="mt-12 space-y-6">
+        <!-- CARD STATISTIK GLOBAL BPMI -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Kelas LMS Kampus</p>
+                    <h3 class="text-2xl font-black text-slate-800 mt-1">{{ $statBpm['total'] }} Kelas</h3>
+                </div>
+                <div class="h-12 w-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-lg shadow-inner"><i class="fas fa-university"></i></div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">RPS Terkumpul (Valid)</p>
+                    <h3 class="text-2xl font-black text-green-600 mt-1">{{ $statBpm['sudah'] }} Berkas</h3>
+                </div>
+                <div class="h-12 w-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-lg shadow-inner"><i class="fas fa-file-invoice"></i></div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">RPS Belum Dilengkapi</p>
+                    <h3 class="text-2xl font-black text-rose-600 mt-1">{{ $statBpm['belum'] }} Kelas</h3>
+                </div>
+                <div class="h-12 w-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-lg shadow-inner"><i class="fas fa-exclamation-circle"></i></div>
+            </div>
+        </div>
+
+        <!-- TABEL KENDALI AUDIT MUTU INTERNAL -->
+        <div class="bg-slate-900 text-white rounded-3xl p-6 md:p-8 shadow-xl">
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 bg-purple-500/20 text-purple-400 rounded-xl flex items-center justify-center text-lg border border-purple-500/30 shadow-inner">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-black tracking-tight text-white">Otoritas BPMI: Audit Mutu Academic Global</h3>
+                        <p class="text-slate-400 text-xs mt-0.5">Memantau standarisasi capaian pembelajaran daring di seluruh program studi Polsa.</p>
+                    </div>
+                </div>
+                <div class="bg-purple-500/10 text-purple-300 border border-purple-500/20 px-3.5 py-1.5 rounded-full text-xs font-bold font-mono">
+                    <i class="fas fa-eye mr-1"></i> Mode Super-Audit
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl border border-white/10 bg-white/5">
+                <table class="w-full text-left border-collapse text-sm text-slate-300">
+                    <thead>
+                        <tr class="bg-white/5 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-white/10">
+                            <th class="px-6 py-4">Program Studi</th>
+                            <th class="px-6 py-4">Mata Kuliah / Ruang Kelas</th>
+                            <th class="px-6 py-4">Dosen Pengampu</th>
+                            <th class="px-6 py-4 text-center">Status Audit</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        @forelse($auditBpmGlobal as $b)
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4">
+                                <span class="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase">
+                                    {{ $b->nama_prodi }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 font-bold text-white">
+                                {{ $b->nama_mk }}
+                                <div class="text-[10px] text-blue-400 font-mono font-normal mt-0.5">{{ $b->kode_mk }} - Kelas {{ $b->nama_kelas }}</div>
+                            </td>
+                            <td class="px-6 py-4 text-slate-300 font-medium">{{ $b->nama_dosen }}</td>
+                            <td class="px-6 py-4 text-center">
+                                @if($b->file_rps)
+                                    <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-bold border border-green-500/30">
+                                        <i class="fas fa-shield-check mr-1"></i> Sesuai Standar
+                                    </span>
+                                @else
+                                    <span class="px-3 py-1 bg-rose-500/20 text-rose-400 rounded-full text-xs font-bold border border-rose-500/30 animate-pulse">
+                                        <i class="fas fa-chart-bar mr-1"></i> Perlu Audit
+                                    </span>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-slate-500 italic">
+                                <i class="fas fa-folder-open text-2xl mb-2 text-slate-600 block"></i>
+                                Belum ada kelas perkuliahan aktif yang terdata di sistem kampus semester ini.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- MODAL BUAT KELAS MANUAl -->
     <div class="modal fade" id="modalBuatKelas" tabindex="-1" aria-hidden="true" data-bs-backdrop="false" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-3xl border-none shadow-2xl">

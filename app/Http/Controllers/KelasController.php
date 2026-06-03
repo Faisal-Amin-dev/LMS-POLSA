@@ -11,88 +11,114 @@ use Illuminate\Support\Facades\DB;
 
 class KelasController extends Controller
 {
-    // ==========================================
-    // 1. TAMPILKAN HALAMAN
-    // ==========================================
+    // ========================================================
+    // 1. TAMPILKAN HALAMAN UTAMA (TERKUNCI TAHUN AJARAN AKTIF)
+    // ========================================================
     public function index(Request $request)
     {
-        $query = Classroom::with(['dosen', 'course', 'mahasiswas']);
+        // REVISI DOSEN: Mengunci daftar kelas hanya pada tahun ajaran aktif agar tidak numpuk histori
+        $query = Classroom::with(['dosen', 'course', 'mahasiswas'])
+            ->where('tahun_ajaran_id', session('tahun_ajaran_id'));
         
-        // Pencarian
+        // Pencarian data kelas
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('nama_kelas', 'like', "%$search%")
-                  ->orWhereHas('course', function($q) use ($search) { 
-                      $q->where('nama_mk', 'like', "%$search%"); 
-                  });
+            $query->where(function($mainQuery) use ($search) {
+                $mainQuery->where('nama_kelas', 'like', "%$search%")
+                          ->orWhereHas('course', function($q) use ($search) { 
+                              $q->where('nama_mk', 'like', "%$search%"); 
+                          });
+            });
         }
 
         $classrooms = $query->latest()->get();
         $dosens = Dosen::all();
         $prodis = \App\Models\Prodi::all();
-        $courses = Course::latest()->get(); // Diurutkan dari yang terbaru
-        // Kelompokkan mahasiswa per kelas untuk checkbox di modal
-        $mahasiswasGrouped = Mahasiswa::select('kelas', DB::raw('count(*) as total'))->groupBy('kelas')->get();
+        
+        // Menampilkan daftar mata kuliah yang terikat kurikulum prodi
+        $courses = Course::latest()->get(); 
+        
+        // Kelompokkan mahasiswa per kelas untuk checkbox rombel di modal
+        $mahasiswasGrouped = Mahasiswa::select('kelas', DB::raw('count(*) as total'))
+            ->groupBy('kelas')
+            ->get();
 
         return view('admin.kelas', compact('classrooms', 'dosens', 'prodis', 'courses', 'mahasiswasGrouped'));
     }
 
-   // ==========================================
-    // 3. RAKIT KELAS MANUAL (VERSI FIX GABUNGAN)
-    // ==========================================
+    // ========================================================
+    // 2. RAKIT KELAS PERKULIAHAN (CLASSROOM GENERATE)
+    // ========================================================
     public function store(Request $request)
     {
-        // 1. Validasi data esensial LMS Online (Bebas hari & jam fisik)
         $request->validate([
             'course_id' => 'required',
             'dosen_id' => 'required',
-            'nama_kelas' => 'required|string|max:255',
-            'tahun_akademik' => 'required|string',
+            'nama_kelas' => 'required|string',
+            'tahun_akademik' => 'required',
         ]);
 
-        try {
-            // Gunakan Database Transaction agar jika salah satu proses gagal, data tidak rusak/setengah masuk
-            \Illuminate\Support\Facades\DB::beginTransaction();
+        // KUNCI UTAMA: Ambil ID Sesi aktif yang sedang berjalan dari session middleware
+        $tahunAjaranId = session('tahun_ajaran_id'); 
 
-            // 2. Siapkan array data gabungan dengan menyisipkan nilai null pada kolom fisik lama
-            $dataKelas = array_merge($request->except('target_kelas'), [
-                'status' => 'aktif',
-                'hari' => null,
-                'jam_mulai' => null,
-                'jam_selesai' => null,
-            ]);
+        // Proses simpan ke tabel classrooms
+        // (Sesuaikan dengan query Eloquent/Query Builder asli bawaan proyek Pakdhe)
+        \App\Models\Classroom::create([
+            'course_id'       => $request->course_id,
+            'dosen_id'        => $request->dosen_id,
+            'nama_kelas'      => $request->nama_kelas,
+            'tahun_akademik'  => $request->tahun_akademik, // Mengisi teks string "2025/2026"
+            'tahun_ajaran_id' => $tahunAjaranId,          // <-- WAJIB DISUNTIKKAN AGAR MUNCUL DI MONITORING!
+            'status'          => 'aktif',                 // Mengunci status agar langsung aktif
+        ]);
 
-            // A. Buat Kelas LMS Baru
-            $kelas = \App\Models\Classroom::create($dataKelas);
+        // Selesaikan juga proses sinkronisasi rombel mahasiswa target_kelas jika ada di bawahnya...
 
-            // B. Hubungkan Dosen dengan Matkul yang dipilih (Agar masuk ke daftar matkul di Profil Dosen)
-            $dosen = \App\Models\Dosen::find($request->dosen_id);
-            if ($dosen) {
-                // syncWithoutDetaching mencegah relasi matkul lama milik dosen terhapus
-                $dosen->courses()->syncWithoutDetaching([$request->course_id]);
-            }
+        return redirect()->back()->with('success', 'Kelas LMS baru berhasil dirakit dan dikunci pada Sesi Akademik Aktif!');
+    }
+    
+    // ========================================================
+    // 3. TAMBAH MATA KULIAH BARU (LANGKAH 4: RELASI KE KURIKULUM)
+    // ========================================================
+    public function storeCourse(Request $request)
+    {
+        $request->validate([
+            'prodi_id' => 'required',
+            'kode_mk' => 'required|string|max:50|unique:courses,kode_mk',
+            'nama_mk' => 'required|string|max:255',
+            'sks' => 'required|integer|min:1|max:6',
+            'semester' => 'required|integer|min:1|max:8', // Validasi input semester dari form UI
+        ]);
 
-            // C. OTOMATISASI ROMBEL: Sedot Mahasiswa berdasarkan Rombongan kelas yang dicentang
-            if ($request->has('target_kelas')) {
-                $mahasiswaIds = \App\Models\Mahasiswa::whereIn('kelas', $request->target_kelas)->pluck('id');
-                $kelas->mahasiswas()->attach($mahasiswaIds);
-            }
+        // Cari Kurikulum Pokok yang sedang AKTIF di Prodi terpilih
+        $kurikulumAktif = DB::table('kurikulums')
+            ->where('prodi_id', $request->prodi_id)
+            ->where('is_aktif', true)
+            ->first();
 
-            // Jika semua langkah A, B, C sukses tanpa interupsi, kunci data ke database
-            \Illuminate\Support\Facades\DB::commit();
-            
-            return redirect()->back()->with('success', 'Kelas LMS Manual berhasil dirakit dan rombel otomatis disedot!');
-
-        } catch (\Exception $e) {
-            // Jika ada satu saja yang gagal/error, batalkan semua proses di atas agar database tetap bersih
-            \Illuminate\Support\Facades\DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal buat kelas manual: ' . $e->getMessage());
+        // Sistem Pengunci Keamanan Data Pokok jika kurikulum belum aktif
+        if (!$kurikulumAktif) {
+            return redirect()->back()->with('error', 'Gagal menambah Mata Kuliah! Kurikulum aktif untuk Program Studi ini belum diset oleh Admin/Kaprodi. Silakan aktifkan kurikulum terlebih dahulu di menu Data Kurikulum.');
         }
+
+        // FIX NO MISTAKE: Menyuntikkan input 'semester' dan 'prodi' sisa arsitektur lama
+        DB::table('courses')->insert([
+            'kurikulum_id' => $kurikulumAktif->id,
+            'kode_mk' => $request->kode_mk,
+            'nama_mk' => $request->nama_mk,
+            'sks' => $request->sks,
+            'semester' => $request->semester, // <-- KUNCI SOLUSI: Data disuntikkan ke database di sini
+            'prodi' => '-',                  // Mengamankan kolom prodi sisa database lama jika belum di-set nullable
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Mata Kuliah berhasil didaftarkan di bawah naungan ' . $kurikulumAktif->nama_kurikulum);
     }
 
-    // ==========================================
-    // 4. UPDATE DATA KELAS
-    // ==========================================
+    // ========================================================
+    // 4. UPDATE DATA KELAS PERKULIAHAN
+    // ========================================================
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -106,7 +132,6 @@ class KelasController extends Controller
             $kelas = Classroom::findOrFail($id);
             $kelas->update($request->all());
 
-            // Pastikan relasi dosen dan matkulnya juga tetap aman jika diubah
             $dosen = Dosen::find($request->dosen_id);
             if ($dosen) {
                 $dosen->courses()->syncWithoutDetaching([$request->course_id]);
@@ -118,18 +143,18 @@ class KelasController extends Controller
         }
     }
 
-    // ==========================================
-    // 5. HAPUS KELAS
-    // ==========================================
+    // ========================================================
+    // 5. HAPUS KELAS PERKULIAHAN
+    // ========================================================
     public function destroy($id)
     {
         Classroom::findOrFail($id)->delete();
-        return redirect()->back()->with('success', 'Kelas beserta seluruh pesertanya berhasil dihapus.');
+        return redirect()->back()->with('success', 'Kelas beserta seluruh peserta di dalamnya berhasil dihapus.');
     }
 
-    // ==========================================
-    // UPDATE MATA KULIAH
-    // ==========================================
+    // ========================================================
+    // 6. UPDATE MATA KULIAH
+    // ========================================================
     public function updateCourse(Request $request, $id)
     {
         $course = Course::findOrFail($id);
@@ -138,30 +163,30 @@ class KelasController extends Controller
             'kode_mk'  => 'required|unique:courses,kode_mk,' . $id,
             'nama_mk'  => 'required',
             'sks'      => 'required|numeric',
-            'prodi_id'    => 'required',
-            'semester' => 'required|numeric',
+            'prodi_id' => 'required',
         ]);
 
-        $course->update($request->all());
+        $course->update($request->except('prodi_id'));
         return redirect()->back()->with('success', 'Mata kuliah berhasil diperbarui!');
     }
 
-    // ==========================================
-    // HAPUS MATA KULIAH
-    // ==========================================
+    // ========================================================
+    // 7. HAPUS MATA KULIAH
+    // ========================================================
     public function destroyCourse($id)
     {
         try {
             $course = Course::findOrFail($id);
-            // Cek apakah matkul ini sudah dipakai di kelas manapun
+            
+            // Validasi Relasi: Mencegah error database cascading yang berantakan
             if ($course->classrooms()->count() > 0) {
-                return redirect()->back()->with('error', 'Matkul tidak bisa dihapus karena sudah memiliki kelas aktif!');
+                return redirect()->back()->with('error', 'Mata kuliah tidak bisa dihapus karena sudah memiliki kelas aktif di LMS!');
             }
             
             $course->delete();
-            return redirect()->back()->with('success', 'Mata kuliah berhasil dihapus.');
+            return redirect()->back()->with('success', 'Mata kuliah berhasil dihapus dari sistem.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus matkul: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menghapus mata kuliah: ' . $e->getMessage());
         }
     }
 }

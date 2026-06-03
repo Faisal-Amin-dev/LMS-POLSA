@@ -1,113 +1,54 @@
-{{-- 
-    DOKUMENTASI DASHBOARD MAHASISWA
-    Visi: Mirip Google Classroom (LMS-POLSA)
-    Integrasi: Siap dihubungkan ke Google Drive API
---}}
-
 @extends('layouts.mahasiswa')
 
+@section('title', 'Beranda Mahasiswa')
+@section('header_title', 'Kelas Saya')
+
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Dashboard Kuliah</h1>
-            <p class="text-gray-500 font-medium">{{ Auth::user()->name }} • {{ $data['akademik']['semester'] }}</p>
-        </div>
-        {{-- Tombol Cepat ke Google Drive Kelas --}}
-        <a href="{{ $data['akademik']['drive_folder'] }}" target="_blank" class="flex items-center px-5 py-2.5 bg-white border-2 border-green-500 text-green-600 rounded-xl font-bold hover:bg-green-50 transition shadow-sm">
-            <i class="fab fa-google-drive mr-2 text-xl"></i>
-            Buka Drive Kelas
-        </a>
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-slate-800">Ruang Kelas LMS Aktif</h2>
+        <p class="text-slate-500 text-sm">Selamat datang kembali! Pilih ruang kelas untuk melihat pengumuman, modul materi, dan tugas praktikum.</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div class="bg-blue-600 rounded-2xl p-6 text-white shadow-lg">
-            <p class="text-blue-100 text-xs font-bold uppercase tracking-widest">Tugas Perlu Tindakan</p>
-            <h3 class="text-4xl font-black mt-2">{{ $data['akademik']['tugas_pending'] }}</h3>
+    @if(session('error'))
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-xl shadow-sm font-bold text-sm">
+            <i class="fas fa-exclamation-circle mr-1"></i> {{ session('error') }}
         </div>
-        <div class="bg-white border-2 border-gray-100 rounded-2xl p-6 shadow-sm">
-            <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Status SPP ({{ date('F') }})</p>
-            <h3 class="text-2xl font-bold mt-2 text-green-600 italic uppercase">{{ $data['akademik']['status_spp'] }}</h3>
-        </div>
-        <div class="bg-white border-2 border-gray-100 rounded-2xl p-6 shadow-sm">
-            <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">IPK Sementara</p>
-            <h3 class="text-2xl font-bold mt-2 text-gray-800">3.75</h3>
-        </div>
-    </div>
+    @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        
-        <div class="lg:col-span-2 space-y-8">
-            
-            <section>
-                <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-clipboard-list mr-3 text-blue-500"></i>
-                    Tugas Mendatang
-                </h3>
-                <div class="space-y-4">
-                    @forelse($data['tugas_terbaru'] as $tugas)
-                    <div class="group bg-white p-5 rounded-2xl border-2 border-transparent hover:border-blue-500 shadow-sm transition-all cursor-pointer">
-                        <div class="flex justify-between items-start">
-                            <div class="flex gap-4">
-                                <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition">
-                                    <i class="fas fa-file-signature text-xl"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-gray-900">{{ $tugas['judul'] }}</h4>
-                                    <p class="text-sm text-gray-500">{{ $tugas['matkul'] }}</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[10px] font-black px-2 py-1 rounded bg-red-100 text-red-600 uppercase">
-                                    Deadline: {{ $tugas['deadline'] }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    @empty
-                    <p class="text-gray-400 italic">Semua tugas sudah selesai dikerjakan.</p>
-                    @endforelse
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @forelse($classrooms as $kelas)
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition-all">
+            <div class="p-5 relative" style="background-color: #FFD700;">
+                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 15px 15px;"></div>
+                <span class="bg-slate-900 text-white text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider float-right relative z-10">
+                    {{ $kelas->tahun_akademik }}
+                </span>
+                <div class="relative z-10 mt-2">
+                    <h3 class="text-xl font-black text-slate-900 line-clamp-1 mb-1">{{ $kelas->course->nama_mk ?? '-' }}</h3>
+                    <p class="text-xs font-bold text-slate-800 opacity-70 font-mono">{{ $kelas->course->kode_mk ?? '-' }}</p>
                 </div>
-            </section>
-
-            <section>
-                <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-folder-open mr-3 text-yellow-500"></i>
-                    Materi Kuliah
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    @foreach($data['materi_terbaru'] as $materi)
-                    <a href="{{ $materi['link'] }}" class="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-white border border-transparent hover:border-gray-200 transition shadow-sm">
-                        <i class="fas fa-file-{{ $materi['tipe'] == 'PDF' ? 'pdf text-red-500' : 'powerpoint text-orange-500' }} text-2xl mr-4"></i>
-                        <span class="font-semibold text-sm text-gray-700">{{ $materi['judul'] }}</span>
-                    </a>
-                    @endforeach
-                </div>
-            </section>
-        </div>
-
-        <aside>
-            <div class="bg-gray-900 rounded-3xl p-6 text-white shadow-xl">
-                <h3 class="font-bold text-lg mb-6 flex items-center">
-                    <i class="fas fa-chalkboard mr-3 text-blue-400"></i>
-                    Kelas Anda
-                </h3>
-                <div class="space-y-4">
-                    @foreach($data['daftar_kelas'] as $kelas)
-                    <div class="p-4 rounded-2xl bg-gray-800 hover:bg-gray-700 transition cursor-pointer border border-gray-700">
-                        <h5 class="font-bold text-sm">{{ $kelas['nama'] }}</h5>
-                        <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest">{{ $kelas['dosen'] }} • {{ $kelas['kode'] }}</p>
-                    </div>
-                    @endforeach
-                </div>
-                
-                <button class="w-full mt-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-sm transition">
-                    Lihat Semua Kelas
-                </button>
             </div>
-        </aside>
 
+            <div class="p-5 flex-1 bg-white flex flex-col justify-between">
+                <div class="mb-4 space-y-2">
+                    <span class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold uppercase tracking-wide inline-block">
+                        Grup: {{ $kelas->nama_kelas }}
+                    </span>
+                    <p class="text-xs text-slate-500 font-medium">
+                        <i class="fas fa-user-tie mr-1.5 text-slate-400"></i> Dosen: {{ $kelas->dosen->nama ?? 'Belum ditentukan' }}
+                    </p>
+                </div>
+
+                <a href="{{ route('mahasiswa.kelas.show', $kelas->id) }}" class="w-full text-center bg-slate-900 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all block shadow-sm shadow-slate-200">
+                    Masuk Kelas LMS <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+        @empty
+        <div class="col-span-full bg-white border border-slate-200 rounded-2xl p-12 text-center text-slate-400 italic font-medium">
+            <i class="fas fa-folder-open text-4xl mb-3 block text-slate-300"></i>
+            Anda belum terdaftar di kelas aktif manapun untuk semester ini.
+        </div>
+        @endforelse
     </div>
-</div>
 @endsection

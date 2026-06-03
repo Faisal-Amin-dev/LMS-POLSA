@@ -108,4 +108,31 @@ class DosenController extends Controller
 
         return redirect()->back()->with('success', 'Profil Dosen dan akun sistem berhasil dihapus selamanya.');
     }
+
+    // ==========================================
+    // MENU BARU REVISI DOSEN: TAMPILKAN JABATAN DOSEN
+    // ==========================================
+    public function indexJabatan()
+    {
+        // Ambil semua data dosen untuk dikelola jabatannya
+        $dosens = \DB::table('dosens')->orderBy('nama', 'asc')->get();
+        return view('admin.dosen_jabatan', compact('dosens'));
+    }
+
+    // ==========================================
+    // MENU BARU REVISI DOSEN: UPDATE JABATAN STRUKTURAL
+    // ==========================================
+    public function updateJabatan(Request $request, $id)
+    {
+        $request->validate([
+            'jabatan' => 'required|in:Dosen,Kaprodi,BPM',
+        ]);
+
+        \DB::table('dosens')->where('id', $id)->update([
+            'jabatan' => $request->jabatan,
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Jabatan struktural dosen berhasil diperbarui!');
+    }
 }

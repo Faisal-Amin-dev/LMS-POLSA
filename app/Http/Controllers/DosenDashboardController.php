@@ -14,53 +14,61 @@ use App\Exports\ArsipNilaiExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 
+
 class DosenDashboardController extends Controller
 {
-    // 1. BERANDA DOSEN (Mirip Google Classroom Home)
-    public function index()
+   public function index()
     {
-        $user = auth()->user();
-        $dosen = Dosen::where('user_id', $user->id)->first();
+        $user = Auth::user();
+        $dosen = \DB::table('dosens')->where('user_id', $user->id)->first();
 
-        if (!$dosen) {
-            return redirect('/')->with('error', 'Data dosen tidak ditemukan.');
+        // 1. Ambil kelas aktif yang diampu dosen itu sendiri
+        $classrooms = \App\Models\Classroom::where('dosen_id', $dosen->id)
+            ->where('tahun_ajaran_id', session('tahun_ajaran_id'))
+            ->where('status', 'aktif')
+            ->with('course')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $courses = \App\Models\Course::latest()->get();
+
+        // 2. FITUR KAPRODI: Monitor prodi sendiri (Menggunakan leftJoin agar data aman tampil)
+        $monitoringProdi = collect();
+        if ($dosen && $dosen->jabatan == 'Kaprodi') {
+            $monitoringProdi = \DB::table('classrooms')
+                ->leftJoin('courses', 'classrooms.course_id', '=', 'courses.id')
+                ->leftJoin('kurikulums', 'courses.kurikulum_id', '=', 'kurikulums.id')
+                ->leftJoin('dosens', 'classrooms.dosen_id', '=', 'dosens.id')
+                ->where('kurikulums.prodi_id', $dosen->prodi_id)
+                ->where('classrooms.tahun_ajaran_id', session('tahun_ajaran_id'))
+                ->select('classrooms.*', 'courses.nama_mk', 'courses.kode_mk', 'dosens.nama as nama_dosen')
+                ->get();
         }
 
-        // KONEKSI KE ADMIN: Hanya mengambil kelas yang statusnya 'aktif' (Belum diarsip Admin)
-        $classrooms = Classroom::where('dosen_id', $dosen->id)
-                                ->where('status', 'aktif')
-                                ->with('course')
-                                ->latest()
-                                ->get();
+        // 3. FITUR BPMI: Audit Global Seluruh Kampus Polsa (Menggunakan leftJoin agar kelas lama ikut muncul)
+        $auditBpmGlobal = collect();
+        $statBpm = ['total' => 0, 'sudah' => 0, 'belum' => 0];
+        
+        if ($dosen && $dosen->jabatan == 'BPM') {
+            $auditBpmGlobal = \DB::table('classrooms')
+                ->leftJoin('courses', 'classrooms.course_id', '=', 'courses.id')
+                ->leftJoin('dosens', 'classrooms.dosen_id', '=', 'dosens.id')
+                ->leftJoin('kurikulums', 'courses.kurikulum_id', '=', 'kurikulums.id')
+                ->leftJoin('prodis', 'kurikulums.prodi_id', '=', 'prodis.id')
+                ->where('classrooms.tahun_ajaran_id', session('tahun_ajaran_id'))
+                ->select('classrooms.*', 'courses.nama_mk', 'courses.kode_mk', 'dosens.nama as nama_dosen', 'prodis.nama_prodi')
+                ->orderBy('prodis.nama_prodi', 'asc')
+                ->get();
 
-        // Tetap kirim data courses untuk modal select tambah kelas manual
-        $courses = $dosen->courses; 
+            // Hitung kalkulasi angka widget statistik
+            $statBpm['total'] = $auditBpmGlobal->count();
+            $statBpm['sudah'] = $auditBpmGlobal->whereNotNull('file_rps')->count();
+            $statBpm['belum'] = $statBpm['total'] - $statBpm['sudah'];
+        }
 
-        return view('dosen.dashboard', compact('dosen', 'courses', 'classrooms'));
+        return view('dosen.dashboard', compact('dosen', 'classrooms', 'courses', 'monitoringProdi', 'auditBpmGlobal', 'statBpm'));
     }
-
-    // 2. MASUK RUANG KELAS DETAIL
-    public function show($id)
-    {
-        // Ambil data dari Classroom, bukan Course abstract lagi
-        $kelas = Classroom::with('course')->findOrFail($id); 
-        $activeTab = request()->query('tab', 'beranda'); 
-        
-        // Mengambil konten berdasarkan Classroom ID
-        $materials = Material::where('classroom_id', $id)->latest()->get();
-        $announcements = Announcement::where('classroom_id', $id)->latest()->get(); 
-        $assignments = Assignment::where('classroom_id', $id)->latest()->get(); 
-        
-        // KONEKSI KE ADMIN: Mengambil rombongan mahasiswa yang disedot oleh Admin ke kelas ini
-        $students = $kelas->mahasiswas; 
-        
-        $submissions = Submission::whereIn('assignment_id', $assignments->pluck('id'))
-                    ->get()
-                    ->groupBy(['mahasiswa_id', 'assignment_id']); 
-
-        return view('dosen.kelas_detail', compact('kelas', 'materials', 'announcements', 'assignments', 'students', 'submissions', 'activeTab'));
-    }
-
+    
     // 3. BUAT KELAS MANUAL (Sudah dibersihkan dari Hari, Jam, Ruangan)
     public function storeKelas(Request $request)
     {

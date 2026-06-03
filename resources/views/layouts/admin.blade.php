@@ -37,7 +37,7 @@
             
             <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-800">
                 <span class="font-bold text-polsa text-xl tracking-wider" x-show="sidebarOpen">SERAP</span>
-                <span class="font-bold text-polsa text-xl tracking-wider" x-show="!sidebarOpen">SRP</span>
+                <i class="fas fa-bars text-polsa text-xl cursor-pointer" x-show="!sidebarOpen" @click="sidebarOpen = true"></i>
             </div>
 
             <button @click="sidebarOpen = !sidebarOpen" class="absolute -right-3 top-20 bg-polsa text-slate-900 rounded-full p-1 shadow-md hover:bg-polsa-hover">
@@ -48,7 +48,7 @@
 
             <nav class="flex-1 overflow-y-auto py-4 space-y-1">
 
-                <li class="px-6 mt-2 mb-1 text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+                <li class="px-6 mt-2 mb-1 text-[10px] font-bold tracking-widest text-slate-500 uppercase" x-show="sidebarOpen">
                     Menu Utama
                 </li>
     
@@ -59,7 +59,7 @@
                     <span class="ml-4 font-medium whitespace-nowrap" x-show="sidebarOpen">Beranda</span>
                 </a>
 
-                <li class="px-6 mt-6 mb-1 text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+                <li class="px-6 mt-6 mb-1 text-[10px] font-bold tracking-widest text-slate-500 uppercase" x-show="sidebarOpen">
                     Data Master
                 </li>
 
@@ -86,29 +86,39 @@
                     <span class="ml-4 font-medium whitespace-nowrap" x-show="sidebarOpen">Data Mahasiswa</span>
                 </a>
                 
-                    <a href="{{ route('admin.prodi.index') }}" 
-                    class="flex items-center gap-3 px-6 py-3 transition-all duration-200 {{ request()->routeIs('admin.prodi.*') ? 'bg-slate-800 text-white border-l-4 border-yellow-400' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
-                        <div class="w-6 flex justify-center">
-                            <i class="fas fa-university"></i>
+                <a href="{{ route('admin.prodi.index') }}" 
+                    class="flex items-center px-4 py-3 transition-all duration-200 {{ request()->routeIs('admin.prodi.*') ? 'bg-slate-800 text-white border-r-4 border-yellow-400' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+                        <div class="w-6 h-6 flex-shrink-0 flex items-center justify-center">
+                            <i class="fas fa-university text-lg"></i>
                         </div>
-                        <span class="font-medium text-sm">Data Prodi</span>
+                        <span class="ml-4 font-medium whitespace-nowrap" x-show="sidebarOpen">Data Prodi</span>
                     </a>
+
+                <a href="{{ route('admin.kurikulum.index') }}" class="flex items-center py-2.5 px-3 rounded transition duration-200 hover:bg-slate-800 {{ request()->routeIs('admin.kurikulum.*') ? 'bg-slate-700 text-white' : 'text-slate-400' }}">
+                    <i class="fas fa-book-open w-6 text-center"></i>
+                    <span class="ml-3 font-medium">Data Kurikulum</span>
+                </a>
+
               
 
-                <li class="px-6 mt-6 mb-1 text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+                <li class="px-6 mt-6 mb-1 text-[10px] font-bold tracking-widest text-slate-500 uppercase" x-show="sidebarOpen">
                     Akademik & KBM
                 </li>
 
                 <li class="nav-item">
                     <a href="{{ route('admin.akademik.index') }}" 
-                    class="flex items-center gap-3 px-6 py-3 transition-all duration-200 {{ request()->routeIs('admin.akademik.*') ? 'bg-slate-800 text-white border-l-4 border-red-500' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
-                        <div class="w-6 flex justify-center">
-                            <i class="fas fa-graduation-cap"></i>
+                    class="flex items-center px-4 py-3 transition-all duration-200 {{ request()->routeIs('admin.akademik.*') ? 'bg-slate-800 text-white border-r-4 border-red-500' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+                        <div class="w-6 h-6 flex-shrink-0 flex items-center justify-center">
+                            <i class="fas fa-graduation-cap text-lg"></i>
                         </div>
-                        <span class="font-medium text-sm">KRS & Akademik</span>
+                        <span class="ml-4 font-medium whitespace-nowrap" x-show="sidebarOpen">KRS & Akademik</span>
                     </a>
                 </li>
 
+                <a href="{{ route('admin.dosen.jabatan') }}" class="flex items-center py-2.5 px-3 rounded transition duration-200 hover:bg-slate-800 {{ request()->routeIs('admin.dosen.jabatan') ? 'bg-slate-700 text-white' : 'text-slate-400' }}">
+                    <i class="fas fa-user-shield w-6 text-center"></i>
+                    <span class="ml-3 font-medium">Set Jabatan Dosen</span>
+                </a>
             </nav>
         </aside>
 

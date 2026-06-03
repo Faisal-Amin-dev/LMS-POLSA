@@ -37,7 +37,7 @@
             
             <div class="h-16 flex items-center justify-center border-b border-slate-700 bg-slate-800">
                 <span class="font-bold text-polsa text-xl tracking-wider" x-show="sidebarOpen">SERAP</span>
-                <span class="font-bold text-polsa text-xl tracking-wider" x-show="!sidebarOpen">SRP</span>
+                <i class="fas fa-bars text-polsa text-xl cursor-pointer" x-show="!sidebarOpen" @click="sidebarOpen = true"></i>
             </div>
 
             <button @click="sidebarOpen = !sidebarOpen" class="absolute -right-3 top-20 bg-polsa text-slate-900 rounded-full p-1 shadow-md hover:bg-polsa-hover">
@@ -76,6 +76,22 @@
                     <span class="ml-4 font-medium whitespace-nowrap" x-show="sidebarOpen">Arsip Nilai</span>
                 </a>
 
+                @if(Auth::user()->dosen && Auth::user()->dosen->jabatan == 'Kaprodi')
+                    <div class="px-3 py-2 mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Menu Struktural</div>
+                    <a href="{{ route('kaprodi.dashboard') }}" class="flex items-center py-2.5 px-3 rounded text-amber-500 hover:bg-slate-800 transition-all font-bold">
+                        <i class="fas fa-chart-line w-6 text-center"></i>
+                        <span class="ml-3">Monitoring Prodi</span>
+                    </a>
+                @endif
+
+                @if(Auth::user()->dosen && Auth::user()->dosen->jabatan == 'BPM')
+                    <div class="px-3 py-2 mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Menu Penjamin Mutu</div>
+                    <a href="{{ route('bpm.dashboard') }}" class="flex items-center py-2.5 px-3 rounded text-purple-500 hover:bg-slate-800 transition-all font-bold">
+                        <i class="fas fa-shield-alt w-6 text-center"></i>
+                        <span class="ml-3">Audit Mutu Kampus</span>
+                    </a>
+                @endif
+
             </nav>
         </aside>
 
@@ -83,8 +99,15 @@
             
             <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 z-10">
     
-            <div class="text-xl font-semibold text-slate-800">
-                @yield('header_title', 'Dashboard')
+            <div class="flex items-center gap-3">
+                <div class="text-xl font-semibold text-slate-800">
+                    @yield('header_title', 'Dashboard')
+                </div>
+                @if(session('tahun_akademik_nama'))
+                    <span class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-2.5 py-1 rounded-lg border border-indigo-100 font-mono tracking-wider uppercase">
+                        <i class="fas fa-calendar-check mr-1"></i> Sesi: {{ session('tahun_akademik_nama') }}
+                    </span>
+                @endif
             </div>
 
             <div class="flex items-center space-x-4">
